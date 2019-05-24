@@ -23,8 +23,8 @@ fn not_found_page_route(_req: HttpRequest) -> Result<HttpResponse, Error> {
 fn main() {
     server::new(|| {
         App::new()
-            .resource("/api/home", |r| {
-                r.method(http::Method::POST).with(home_page_route)
+            .scope("/api", |scope| {
+                scope.route("/home", http::Method::POST, home_page_route)
             })
             .default_resource(|r| r.with(not_found_page_route))
     })
