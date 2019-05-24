@@ -1,8 +1,10 @@
 [package]
-name = "QV"
+name = "qv"
 version = "0.1.0"
 authors = ["maxgurewitz <maxthegeek1@gmail.com>"]
 edition = "2018"
 
 [dependencies]
 actix-web = "0.7.*"
+serde = "1.0.*"
+serde_derive = "1.0.*"
