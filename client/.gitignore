@@ -40,9 +40,6 @@ node_modules/
 # Output of 'npm pack'
 *.tgz
 
-# dotenv environment variables file
-.env
-
 # next.js build output
 .next
 
@@ -52,3 +49,6 @@ dist/**/*
 # Editors
 .idea
 *.iml
+
+# temporary directories
+tmp

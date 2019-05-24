@@ -20,6 +20,7 @@ fn not_found_page_route(_req: HttpRequest) -> Result<HttpResponse, Error> {
         .body("{ \"message\": \"route not found\" }"))
 }
 
+// auth flow https://auth0.com/docs/flows/concepts/auth-code
 fn main() {
     server::new(|| {
         App::new()
