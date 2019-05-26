@@ -13,6 +13,7 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenv::dotenv;
+use rand::Rng;
 use std::env;
 
 #[derive(Serialize)]
@@ -26,7 +27,7 @@ fn build_pg_pool() -> PgPool {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let pg_manager = ConnectionManager::<PgConnection>::new(database_url);
-    Pool::builder().max_size(15).build(pg_manager).unwrap()
+    Pool::builder().build(pg_manager).unwrap()
 }
 
 // routes
@@ -48,8 +49,11 @@ fn login_route(data: web::Data<AppData>, _reg: HttpRequest) -> Result<HttpRespon
     // TODO error handling
     let connection = data.pg_pool.get().unwrap();
 
+    let mut rng = rand::thread_rng();
+    let num: f32 = rng.gen();
+
     let new_user = NewUser {
-        openid: "test-user",
+        openid: format!("test-user-{}", num.to_string()),
         email: "test@email.com",
     };
 
@@ -61,7 +65,7 @@ fn login_route(data: web::Data<AppData>, _reg: HttpRequest) -> Result<HttpRespon
     // create user if not found
     Ok(HttpResponse::NotFound()
         .content_type("application/json")
-        .body("{ \"message\": \"route not found\" }"))
+        .body("{ \"message\": \"success\" }"))
 }
 
 struct AppData {
@@ -80,7 +84,7 @@ fn main() {
             .wrap(middleware::Logger::default())
             .service(
                 web::scope("/api")
-                    .route("/login", web::get().to(login_route))
+                    .route("/login", web::post().to(login_route))
                     .route("/home", web::post().to(home_page_route)),
             )
             .default_service(web::route().to(not_found_page_route))
