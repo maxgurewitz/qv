@@ -1,16 +1,21 @@
 import React from 'react';
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import CssBaseline from '@material-ui/core/CssBaseline';
 import './App.css';
 import Home from './Home';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import { Route, Switch } from 'react-router' // react-router v4/v5
+import { ConnectedRouter } from 'connected-react-router'
+import { history } from './configureStore'
 
 const App: React.FC = () => {
   return (
     <div className="App">
       <CssBaseline />
-      <Router>
-        <Route exact path="/" component={Home} />
-      </Router>
+      <ConnectedRouter history={history}>
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route render={() => (<div>404</div>)} />
+        </Switch>
+      </ConnectedRouter>
     </div>
   );
 }
