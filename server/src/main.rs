@@ -73,6 +73,8 @@ struct AppData {
 }
 
 // auth flow https://auth0.com/docs/flows/concepts/auth-code
+// https://auth0.com/docs/flows/guides/implicit/add-login-implicit
+// https://auth0.com/docs/architecture-scenarios/spa-api
 fn main() {
     HttpServer::new(|| {
         let pg_pool = build_pg_pool();
