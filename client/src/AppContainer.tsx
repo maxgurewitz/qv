@@ -23,7 +23,11 @@ const App: React.FC<AppProps> = ({ loggedIn }) => {
       <CssBaseline />
       <ConnectedRouter history={history}>
         <Switch>
-          <Route exact path="/" component={Home} />
+          <Route exact path="/" render={() => (
+            loggedIn ?
+              <Redirect to="/app" /> :
+              <Home />
+          )} />
           <Route path="/app" render={() => (
             loggedIn ?
               <LoggedIn /> :
@@ -41,6 +45,5 @@ function mapStateToProps(state: CombinedState): AppProps {
     loggedIn: state.primary.accessToken !== null
   };
 };
-
 
 export default connect(mapStateToProps)(App);

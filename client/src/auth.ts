@@ -1,6 +1,6 @@
 import auth0 from 'auth0-js';
 
-function generateNonceString(length: number): string {
+function generateRandomString(length: number): string {
     const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._~';
     let result = ''
 
@@ -32,10 +32,14 @@ const webAuth = new auth0.WebAuth({
 });
 
 export function login() {
-    const nonceString = generateNonceString(16);
+    const nonceString = generateRandomString(16);
     window.localStorage.setItem('nonce', nonceString);
 
+    const stateString = generateRandomString(16);
+    window.localStorage.setItem('state', stateString);
+
     webAuth.authorize({
+        state: stateString,
         nonce: nonceString
     });
 }
