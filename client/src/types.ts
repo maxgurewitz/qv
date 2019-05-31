@@ -9,6 +9,10 @@ export namespace Actions {
         source: "internal"
     }
 
+    export interface Login extends BaseAction {
+        type: "Login"
+    }
+
     export interface NoOp extends BaseAction {
         type: "NoOp"
     }
@@ -19,4 +23,4 @@ export interface CombinedState {
     primary: State
 }
 
-export type Action = Actions.NoOp;
+export type Action = Actions.NoOp | Actions.Login;

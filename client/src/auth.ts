@@ -23,7 +23,6 @@ function generateNonceString(length: number): string {
     return result;
 }
 
-
 const webAuth = new auth0.WebAuth({
     domain: 'maxthegeek1.auth0.com',
     clientID: 'Y8jd6mTa83Z6dVpQQyukniATeI3B4sna',

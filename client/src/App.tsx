@@ -1,7 +1,7 @@
 import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import './App.css';
-import Home from './Home';
+import Home from './HomeContainer';
 import NotFound from './NotFound';
 import { Route, Switch } from 'react-router' // react-router v4/v5
 import { ConnectedRouter } from 'connected-react-router'

@@ -1,4 +1,6 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { login } from './auth';
@@ -20,4 +22,13 @@ const Home: React.FC = () => {
     );
 }
 
-export default Home;
+function mapDispatchToProps(dispatch: Dispatch) {
+    return {
+        login: () => dispatch({
+            source: 'internal',
+            type: 'Login'
+        })
+    };
+}
+
+export default connect(null, mapDispatchToProps)(Home);

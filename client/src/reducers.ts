@@ -13,6 +13,8 @@ function primaryReducer(state = initialState, action: Action): State {
     }
 
     switch (action.type) {
+        case "Login":
+            return state;
         case "NoOp":
             return state;
     }
