@@ -76,6 +76,8 @@ struct AppData {
 // https://auth0.com/docs/flows/guides/implicit/add-login-implicit
 // https://auth0.com/docs/architecture-scenarios/spa-api
 fn main() {
+    let port = env::var("PORT").unwrap_or("8000".to_string());
+
     HttpServer::new(|| {
         let pg_pool = build_pg_pool();
 
@@ -91,8 +93,8 @@ fn main() {
             )
             .default_service(web::route().to(not_found_page_route))
     })
-    .bind("127.0.0.1:8000")
-    .expect("Can not bind to port 8000")
+    .bind(format!("127.0.0.1:{}", port))
+    .expect("Can not bind to port")
     .run()
     .unwrap();
 }
