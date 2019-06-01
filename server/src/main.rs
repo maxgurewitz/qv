@@ -98,4 +98,6 @@ fn main() {
     .expect("Can not bind to port")
     .run()
     .unwrap();
+
+    println!("Started server");
 }
