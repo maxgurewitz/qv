@@ -77,6 +77,7 @@ struct AppData {
 // https://auth0.com/docs/architecture-scenarios/spa-api
 fn main() {
     let port = env::var("PORT").unwrap_or("8000".to_string());
+    println!("Attempting to bind to port: {}", port);
 
     HttpServer::new(|| {
         let pg_pool = build_pg_pool();
