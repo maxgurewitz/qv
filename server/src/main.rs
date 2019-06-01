@@ -94,10 +94,8 @@ fn main() {
             )
             .default_service(web::route().to(not_found_page_route))
     })
-    .bind(format!("127.0.0.1:{}", port))
+    .bind(format!("0.0.0.0:{}", port))
     .expect("Can not bind to port")
     .run()
     .unwrap();
-
-    println!("Started server");
 }
