@@ -2,8 +2,10 @@ use super::db;
 use super::models::NewUser;
 use actix_service::{Service, Transform};
 use actix_web::dev::{ServiceRequest, ServiceResponse};
+use actix_web::error::ErrorUnauthorized;
+use actix_web::http::header::AUTHORIZATION;
 use actix_web::{Error, HttpMessage};
-use futures::future::{ok, Either, FutureResult};
+use futures::future::{err, ok, Either, FutureResult};
 use futures::Poll;
 use std::sync::Arc;
 
@@ -43,6 +45,27 @@ pub struct AuthExtension {
     pub user: Arc<NewUser>,
 }
 
+fn parse_bearer(req: &ServiceRequest) -> Option<String> {
+    let header = req.headers().get(AUTHORIZATION)?;
+    // "Bearer *" length
+    if header.len() < 8 {
+        return Option::None;
+    }
+
+    let mut parts = header.to_str().ok()?.splitn(2, ' ');
+
+    match parts.next() {
+        Some(scheme) if scheme == "Bearer" => (),
+        _ => return Option::None,
+    }
+
+    let token = parts.next()?;
+
+    Option::from(token.to_string())
+}
+
+static MISSING_HEADER_MSG: &str = "{ \"message\": \"Must pass Authorization Bearer header.\" }";
+
 impl<S, B> Service for AuthMiddleware<S>
 where
     S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
@@ -58,6 +81,21 @@ where
     }
 
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
+        let maybe_bearer = parse_bearer(&req);
+
+        if maybe_bearer.is_none() {
+            return Either::B(err(ErrorUnauthorized(MISSING_HEADER_MSG)));
+        }
+
+        let bearer = maybe_bearer.unwrap();
+        println!("Bearer: {}", bearer);
+
+        let _app_data = req
+            .app_data::<AppData>()
+            .expect("Programmatic error, app data not initialized.");
+
+        let _query_result = _app_data.pg_pool.get();
+
         // FIXME add auth logic here
         let user = NewUser {
             email: "foo".to_string(),

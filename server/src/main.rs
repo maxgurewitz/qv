@@ -35,7 +35,7 @@ fn get_user_from_req(req: HttpRequest) -> Result<Arc<NewUser>, Error> {
 
 // routes
 fn home_page_route(req: HttpRequest) -> Result<web::Json<HomePageResource>, Error> {
-    let user = get_user_from_req(req)?;
+    let _user = get_user_from_req(req)?;
 
     Ok(web::Json(HomePageResource {
         name: "foo".to_string(),
