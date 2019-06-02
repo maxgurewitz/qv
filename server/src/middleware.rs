@@ -1,3 +1,4 @@
+extern crate jsonwebtoken as jwt;
 use super::db;
 use super::models::NewUser;
 use actix_service::{Service, Transform};
@@ -7,6 +8,8 @@ use actix_web::http::header::AUTHORIZATION;
 use actix_web::{Error, HttpMessage};
 use futures::future::{err, ok, Either, FutureResult};
 use futures::Poll;
+use jwt::{decode, encode, Algorithm, Header, Validation};
+use serde_json::value::Value;
 use std::sync::Arc;
 
 // https://github.com/actix/examples/blob/master/middleware/src/simple.rs
@@ -15,8 +18,30 @@ use std::sync::Arc;
 // https://dev.to/mygnu/auth-web-microservice-with-rust-using-actix-web---complete-tutorial-part-2-k3a
 // https://www.jamesbaum.co.uk/blether/creating-authentication-middleware-actix-rust-react/
 // https://github.com/actix/actix-web/issues/300
+#[derive(Debug, Serialize, Deserialize)]
+struct Claims {
+    sub: String,
+    company: String,
+    exp: usize,
+}
 
 static _JWT_PUBLIC_KEY: &str = "{\"keys\":[{\"alg\":\"RS256\",\"kty\":\"RSA\",\"use\":\"sig\",\"x5c\":[\"MIIDBTCCAe2gAwIBAgIJXNFmm/00aDEeMA0GCSqGSIb3DQEBCwUAMCAxHjAcBgNVBAMTFW1heHRoZWdlZWsxLmF1dGgwLmNvbTAeFw0xODA3MDEwNjU1MTFaFw0zMjAzMDkwNjU1MTFaMCAxHjAcBgNVBAMTFW1heHRoZWdlZWsxLmF1dGgwLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANKfuFitIpFrJbgm8JENTlwOLDZWvMidE2zCSHlpyotQdDohFKfOHqs/Hjj9DJ8AzIw0q3N+Xc3gt8klPOm6Ix/D55Q4DECQO/orGhyCL0NkuYKn6iGAS4hRwgrz9syCVfDQEe/K1PUC9AnfBGgj9SDxScO7sjRaMjTqxscphrB7sAXtgKvVRERuaQxc8JeX2x/HGMUNrJlFho2s/sn+UP6fH5Ix1vfIB1w3ixRiku9Qp1nCAkVTBCPIVRBm+9Hq1UohE+uBCkXQ6+fxEF2h+7p4VEgoR3eV4psBsZX46jOeEucucxPzPNhoNx7S67MViPJuIlkNG8uZB1ag6flX+g0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUHXj0hn1+jKHAim02ffhpegWRL5AwDgYDVR0PAQH/BAQDAgKEMA0GCSqGSIb3DQEBCwUAA4IBAQBEs/pBb+YbjLwdwFMmVIgA8mzduXJxleAtWl1ffKxjG57ApJ8xLuc2vIoygB5rX/kNZZgTyZzTvdPg2rbWCNsONUzxic4eDAcuPHGalN9VlB03QH29uEWyxYa0sL1FlToQbYglT5pkS68F6wbOxHSqZFuFvKmtaRPHNJZqMJLVx9GuOchozjllrGiZ6ko5iu7ePRkM44IXgp5+Bq4cDOWV41lFEOg5ClLXGh/PIhHxOKnKGuWxfHBHu8p8LwQ5w9cqDye88rEBqO/WMNb6TYCu6HRxVPKwVRsF8ZeBN2Bc1EpRnWw3ffMbxGNwag0otCNnWf8eCGGiEG3UXDLBMN2T\"],\"n\":\"0p-4WK0ikWsluCbwkQ1OXA4sNla8yJ0TbMJIeWnKi1B0OiEUp84eqz8eOP0MnwDMjDSrc35dzeC3ySU86bojH8PnlDgMQJA7-isaHIIvQ2S5gqfqIYBLiFHCCvP2zIJV8NAR78rU9QL0Cd8EaCP1IPFJw7uyNFoyNOrGxymGsHuwBe2Aq9VERG5pDFzwl5fbH8cYxQ2smUWGjaz-yf5Q_p8fkjHW98gHXDeLFGKS71CnWcICRVMEI8hVEGb70erVSiET64EKRdDr5_EQXaH7unhUSChHd5XimwGxlfjqM54S5y5zE_M82Gg3HtLrsxWI8m4iWQ0by5kHVqDp-Vf6DQ\",\"e\":\"AQAB\",\"kid\":\"OEQ0MTE1NkYyNTVFQkNFQkFGQ0UyMDZDN0EzQjg1NDcyNEQ3QjJBMQ\",\"x5t\":\"OEQ0MTE1NkYyNTVFQkNFQkFGQ0UyMDZDN0EzQjg1NDcyNEQ3QjJBMQ\"}]}";
+static _DOMAIN: &str = "https://shrouded-waters-56080.herokuapp.com/";
+
+fn _decode_jwt(token: &String) -> Option<Claims> {
+    decode::<Claims>(
+        &token,
+        _JWT_PUBLIC_KEY.as_ref(),
+        &Validation {
+            algorithms: vec![Algorithm::RS256],
+            aud: Option::Some(Value::String(_DOMAIN.to_string())),
+            iss: Option::Some(_DOMAIN.to_string()),
+            ..Validation::default()
+        },
+    )
+    .ok()
+    .map(|token| token.claims)
+}
 
 pub struct Auth;
 
