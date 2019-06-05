@@ -28,7 +28,7 @@ const webAuth = new auth0.WebAuth({
     clientID: 'Y8jd6mTa83Z6dVpQQyukniATeI3B4sna',
     redirectUri: 'http://localhost:3000/auth-callback',
     responseType: 'token',
-    scope: 'openid email'
+    scope: 'openid email profile'
 });
 
 export function login() {
