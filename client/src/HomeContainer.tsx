@@ -4,6 +4,7 @@ import { Dispatch } from 'redux';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { login } from './auth';
+import { Action } from './types';
 
 const Home: React.FC = () => {
     return (
@@ -22,7 +23,7 @@ const Home: React.FC = () => {
     );
 }
 
-function mapDispatchToProps(dispatch: Dispatch) {
+function mapDispatchToProps(dispatch: Dispatch<Action>) {
     return {
         login: () => dispatch({
             source: 'internal',

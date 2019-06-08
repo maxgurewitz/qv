@@ -1,4 +1,4 @@
-import { combineReducers } from 'redux'
+import redux, { combineReducers } from 'redux'
 import { connectRouter } from 'connected-react-router'
 import { History } from 'history';
 import { State, Action } from './types';
@@ -14,6 +14,8 @@ function primaryReducer(state = initialState, action: Action): State {
 
     switch (action.type) {
         case "Login":
+            return state;
+        case "AuthCallback":
             return state;
         case "NoOp":
             return state;

@@ -7,6 +7,7 @@ extern crate actix_web;
 mod db;
 mod middleware;
 mod models;
+mod queries;
 mod schema;
 
 use self::models::*;
@@ -14,8 +15,10 @@ use actix_web::error::ErrorInternalServerError;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use diesel::prelude::*;
 use rand::Rng;
+use reqwest;
 use std::env;
 use std::sync::Arc;
+use Option::Some;
 
 #[derive(Serialize)]
 struct HomePageResource {
@@ -61,8 +64,11 @@ fn login_route(
     let num: f32 = rng.gen();
 
     let new_user = NewUser {
-        openid: format!("test-user-{}", num.to_string()),
-        email: "test@email.com".to_string(),
+        email: format!("test-user-{}@email.com", num.to_string()).to_string(),
+        email_verified: Some(true),
+        name: Some("foo".to_string()),
+        locale: Some("en".to_string()),
+        picture: Some("pictures.com/profile".to_string()),
     };
 
     diesel::insert_into(users::table)
@@ -97,10 +103,13 @@ fn main() {
             })
             .unwrap_or(middleware::Env::Prod);
 
+        let http_client = reqwest::Client::new();
+
         App::new()
             .data(middleware::AppData {
                 pg_pool: pg_pool.clone(),
                 _env: env,
+                http_client,
             })
             .wrap(actix_web::middleware::Logger::default())
             .service(

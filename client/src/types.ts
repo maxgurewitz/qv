@@ -9,6 +9,13 @@ export namespace Actions {
         source: "internal"
     }
 
+    export interface AuthCallback extends BaseAction {
+        type: "AuthCallback",
+        nonce: string,
+        state: string,
+        accessToken: string
+    }
+
     export interface Login extends BaseAction {
         type: "Login"
     }
@@ -23,4 +30,4 @@ export interface CombinedState {
     primary: State
 }
 
-export type Action = Actions.NoOp | Actions.Login;
+export type Action = Actions.NoOp | Actions.Login | Actions.AuthCallback;
