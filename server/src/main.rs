@@ -7,18 +7,13 @@ extern crate actix_web;
 mod db;
 mod middleware;
 mod models;
-mod queries;
-mod schema;
 
 use self::models::*;
 use actix_web::error::ErrorInternalServerError;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
-use diesel::prelude::*;
-use rand::Rng;
 use reqwest;
 use std::env;
 use std::sync::Arc;
-use Option::Some;
 
 #[derive(Serialize)]
 struct HomePageResource {
@@ -27,7 +22,7 @@ struct HomePageResource {
 
 static USER_NOT_FOUND_MSG: &str = "{ \"message\": \"Unable to locate user.\" }";
 
-fn get_user_from_req(req: HttpRequest) -> Result<Arc<NewUser>, Error> {
+fn get_user_from_req(req: HttpRequest) -> Result<Arc<Auth0Profile>, Error> {
     let extensions = req.extensions();
 
     extensions
@@ -52,30 +47,9 @@ fn not_found_page_route(_req: HttpRequest) -> Result<HttpResponse, Error> {
 }
 
 fn login_route(
-    data: web::Data<middleware::AppData>,
+    _data: web::Data<middleware::AppData>,
     _reg: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-    use schema::users;
-
-    // TODO error handling
-    let connection = data.pg_pool.get().unwrap();
-
-    let mut rng = rand::thread_rng();
-    let num: f32 = rng.gen();
-
-    let new_user = NewUser {
-        email: format!("test-user-{}@email.com", num.to_string()).to_string(),
-        email_verified: Some(true),
-        name: Some("foo".to_string()),
-        locale: Some("en".to_string()),
-        picture: Some("pictures.com/profile".to_string()),
-    };
-
-    diesel::insert_into(users::table)
-        .values(&new_user)
-        .get_result::<User>(&*connection)
-        .expect("Error saving new post");
-
     // create user if not found
     Ok(HttpResponse::NotFound()
         .content_type("application/json")

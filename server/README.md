@@ -2,6 +2,12 @@
 
 ## Deployments
 
+The first time you deploy you will need to add a remote to your local repository.  From the `server` directory, run the following command once.
+
+```
+heroku git:remote -a shrouded-waters-56080
+```
+
 From the `qv` projects root directory, run
 
 ```
