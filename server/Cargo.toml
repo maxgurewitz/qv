@@ -6,13 +6,13 @@ edition = "2018"
 
 [dependencies]
 actix-web = "1.0.0-rc"
-serde = "1.0.*"
+serde = { version = "1.0.*", features = ["rc"] }
 serde_json = "1.0"
+actix-cors = "0.1.*"
 serde_derive = "1.0.*"
-reqwest = "0.9.17"
+actix-utils = "0.4.1"
 diesel = { version = "1.4.*", features = ["postgres", "r2d2"] }
 actix-service = "0.4.0"
-futures = "0.1.27"
+futures = "0.1"
 dotenv = "0.9.*"
 r2d2 = "0.8.*"
-rand = "0.6.*"
