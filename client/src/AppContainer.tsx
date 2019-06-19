@@ -6,6 +6,7 @@ import { ConnectedRouter } from 'connected-react-router';
 import { history } from './configureStore';
 import './App.css';
 import Home from './HomeContainer';
+import AuthCallback from './AuthCallbackContainer';
 import NotFound from './NotFound';
 import { CombinedState } from './types';
 
@@ -32,6 +33,11 @@ const App: React.FC<AppProps> = ({ loggedIn }) => {
             loggedIn ?
               <LoggedIn /> :
               <Redirect to="/" />
+          )} />
+          <Route exact path="/auth-callback" render={() => (
+            loggedIn ?
+              <Redirect to="/app" /> :
+              <AuthCallback />
           )} />
           <Route component={NotFound} />
         </Switch>

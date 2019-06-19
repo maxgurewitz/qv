@@ -3,10 +3,13 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { login } from './auth';
 import { Action } from './types';
 
-const Home: React.FC = () => {
+interface HomeProps {
+  login: () => void;
+}
+
+const Home: React.FC<HomeProps> = (props) => {
     return (
         <Grid
             container
@@ -15,7 +18,7 @@ const Home: React.FC = () => {
             alignItems="center"
             className="centered-grid">
             <div className="Home">
-                <Button onClick={login} variant="contained" color="primary" >
+                <Button onClick={props.login} variant="contained" color="primary" >
                     Login
                 </Button>
             </div>
@@ -23,12 +26,14 @@ const Home: React.FC = () => {
     );
 }
 
-function mapDispatchToProps(dispatch: Dispatch<Action>) {
+function mapDispatchToProps(dispatch: Dispatch<Action>) : HomeProps {
     return {
-        login: () => dispatch({
+        login: () => { 
+          dispatch({
             source: 'internal',
             type: 'Login'
-        })
+          })
+      }
     };
 }
 

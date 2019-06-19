@@ -32,6 +32,9 @@ struct HttpBinResponse {
 
 // Implemented from example: 
 // https://github.com/actix/examples/blob/aa5750cafc9d6bc96e098c338b70fa618149ffd5/async_ex1/src/main.rs
+// 
+// See details on auth implementation:
+// https://auth0.com/docs/architecture-scenarios/spa-api
 fn fetch_user_info(
     client: &actix_web::client::Client,
     bearer_token: &String,

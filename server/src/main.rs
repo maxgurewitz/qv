@@ -59,9 +59,6 @@ fn login_route(
   )
 }
 
-// auth flow https://auth0.com/docs/flows/concepts/auth-code
-// https://auth0.com/docs/flows/guides/implicit/add-login-implicit
-// https://auth0.com/docs/architecture-scenarios/spa-api
 fn main() {
   let port = env::var("PORT").unwrap_or("8000".to_string());
 
