@@ -5,7 +5,7 @@ authors = ["maxgurewitz <maxthegeek1@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-actix-web = "1.0.0-rc"
+actix-web = { version = "1.0.0-rc", features = ["ssl"] }
 serde = { version = "1.0.*", features = ["rc"] }
 serde_json = "1.0"
 actix-cors = "0.1.*"

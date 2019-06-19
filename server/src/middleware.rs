@@ -50,12 +50,14 @@ fn fetch_user_info(
         .and_then(|resp| {
             resp.from_err()
                 .fold(BytesMut::new(), |mut acc, chunk| {
-                    acc.extend_from_slice(&chunk);
-                    Ok::<_, Error>(acc)
+                  acc.extend_from_slice(&chunk);
+                  Ok::<_, Error>(acc)
                 })
-                .map(|body| {
-                    let body: HttpBinResponse = serde_json::from_slice(&body).unwrap();
-                    body.json
+                .and_then(|body| {
+                  serde_json::from_slice(&body).map_err(|e| {
+                    println!("Response has unexpected structure: {}", e);
+                    ErrorUnauthorized(INVALID_TOKEN_MSG)
+                  })
                 })
         })
 }

@@ -82,8 +82,6 @@ fn main() {
 
     let http_client = actix_web::client::Client::default();
 
-    // FIXME Access to XMLHttpRequest at 'localhost:8000/api/private/user_info' from origin 'http://localhost:3000' has been blocked by CORS policy: Cross origin requests are only supported for protocol schemes: http, data, chrome, chrome-extension, https.
-    // https://docs.rs/actix-cors/0.1.0/actix_cors/
     App::new()
       .wrap(Cors::new().send_wildcard())
       .data(middleware::AppData {
