@@ -15,7 +15,7 @@ function* onAuthCallback(action: Actions.AuthCallback) {
   try {
     userInfoResponse = yield getUserInfo(action.accessToken);
   } catch (e) {
-    console.error(e);
+    console.error("Unable to retrieve user info", e);
   }
   if (userInfoResponse == null) {
     yield put({ source: 'internal', type: 'LogOut' });
@@ -32,8 +32,38 @@ function* onAuthCallback(action: Actions.AuthCallback) {
   }
 }
 
+function* initialize(action: Actions.Initialize) {
+  if (action.accessToken != null) {
+    let userInfoResponse = null;
+    try {
+      userInfoResponse = yield getUserInfo(action.accessToken);
+    } catch (e) {
+      console.error("Unable to retrieve user info", e);
+    }
+
+    if (userInfoResponse !== null) {
+      yield put({ 
+        source: 'internal',
+        type: 'UserInfo',
+        userInfo: userInfoResponse.data,
+        accessToken: action.accessToken 
+      });
+      yield put(push('/app'));
+    } else {
+      yield put({ source: 'internal', type: 'LogOut' });
+    }
+  } else {
+      yield put({ source: 'internal', type: 'LogOut' });
+  }
+
+}
+
 function* watchAuthCallback() {
   yield takeLeading('AuthCallback', onAuthCallback);
+}
+
+function* watchInitialize() {
+  yield takeLeading('Initialize', initialize);
 }
 
 function* watchLogOut() {
@@ -44,6 +74,7 @@ export default function* rootSaga(): IterableIterator<any> {
   yield all([
     call(watchLogin),
     call(watchLogOut),
-    call(watchAuthCallback)
+    call(watchAuthCallback),
+    call(watchInitialize)
   ]);
 }

@@ -4,7 +4,7 @@ import { History } from 'history';
 import { State, Action } from './types';
 
 const initialState: State = {
-  accessToken: null,
+  accessToken: window.localStorage.getItem("token") || null,
   userInfo: null
 };
 
@@ -17,15 +17,22 @@ function primaryReducer(state = initialState, action: Action): State {
     case "UserInfo":
       state.userInfo = action.userInfo;
       state.accessToken = action.accessToken;
-      return state
+      return state;
+
     case "LogOut":
       state.accessToken = null;
       state.userInfo = null;
       return state;
+
+    case "Initialize":
+      return state;
+
     case "Login":
       return state;
+
     case "AuthCallback":
       return state;
+
     case "NoOp":
       return state;
   }

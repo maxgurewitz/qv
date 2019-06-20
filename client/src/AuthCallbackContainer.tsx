@@ -1,12 +1,8 @@
 import React from 'react';
 import { Dispatch } from 'redux';
-import Grid from '@material-ui/core/Grid';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import LoadingPage from './LoadingPage';
 import { connect, MapStateToPropsParam } from 'react-redux';
-import { State, Action, CombinedState } from './types';
-import { access } from 'fs';
-import { any } from 'prop-types';
-import { logOut } from './auth';
+import { Action, CombinedState } from './types';
 
 class AuthCallback extends React.Component<AuthCallbackProps, {}> {
 
@@ -16,21 +12,13 @@ class AuthCallback extends React.Component<AuthCallbackProps, {}> {
     if (accessToken != null && state != null) {
       getUserInfo(accessToken, state);
     } else {
-      debugger;
       logOut();
     }
   }
 
   render() {
     return (
-      <Grid
-        container
-        direction="column"
-        justify="center"
-        alignItems="center"
-        className="centered-grid">
-        <CircularProgress />
-      </Grid>
+      <LoadingPage/>
     );
   }
 }
@@ -46,7 +34,6 @@ const mapStateToProps: MapStateToPropsParam<AuthCallbackStateProps, {}, Combined
   const hash = state.router.location.hash;
   const queryParams = new URLSearchParams(hash.slice(1, hash.length));
 
-  debugger;
   return {
     accessToken: queryParams.get('access_token'),
     state: queryParams.get('state'),

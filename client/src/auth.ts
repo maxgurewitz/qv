@@ -1,5 +1,4 @@
 import auth0 from 'auth0-js';
-import { stat } from 'fs';
 
 const clientID = 'Y8jd6mTa83Z6dVpQQyukniATeI3B4sna';
 

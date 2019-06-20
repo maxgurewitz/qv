@@ -34,6 +34,11 @@ export namespace Actions {
     userInfo: UserInfo
   }
 
+  export interface Initialize extends BaseAction {
+    type: "Initialize",
+    accessToken: string | null
+  }
+
   export interface LogOut extends BaseAction {
     type: "LogOut"
   }
@@ -48,4 +53,4 @@ export interface CombinedState {
   primary: State
 }
 
-export type Action = Actions.NoOp | Actions.Login | Actions.AuthCallback | Actions.LogOut | Actions.UserInfoAction;
+export type Action = Actions.NoOp | Actions.Login | Actions.AuthCallback | Actions.LogOut | Actions.UserInfoAction | Actions.Initialize;
