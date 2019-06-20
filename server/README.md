@@ -16,6 +16,15 @@ git subtree push --prefix server heroku master
 
 ## Local Development
 
+### Configuring the server
+
+Create a local `.env` file within the `server` directory. Its contents should look as follows,
+
+```
+DATABASE_URL=postgres://postgres:@localhost/qv
+RUST_BACKTRACE=1
+```
+
 ### Running the Server
 
 The server can be run with vanilla cargo from the `server` directory with,

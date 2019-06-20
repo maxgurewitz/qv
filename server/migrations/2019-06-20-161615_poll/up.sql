@@ -1,0 +1,48 @@
+-- Your SQL goes here
+CREATE TABLE poll (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR NOT NULL,
+  title VARCHAR NOT NULL,
+  poll_type VARCHAR NOT NULL DEFAULT 'qv_multi_prop',
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX poll_index ON poll(email);
+
+CREATE TABLE proposal (
+  id SERIAL PRIMARY KEY,
+  content VARCHAR NOT NULL,
+  poll_id INTEGER NOT NULL REFERENCES poll(id),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX proposal_index ON proposal(poll_id);
+
+CREATE TABLE poll_instance (
+  id SERIAL PRIMARY KEY,
+  poll_id INTEGER NOT NULL REFERENCES poll(id),
+  has_started BOOLEAN NOT NULL DEFAULT False,
+  title VARCHAR NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX poll_instance_index ON proposal(poll_id);
+
+CREATE TABLE user_invite (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR NOT NULL,
+  poll_id INTEGER NOT NULL REFERENCES poll(id),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX user_invite_index ON user_invite(email, poll_id);
+
+CREATE TABLE vote (
+  user_invite_id INTEGER PRIMARY KEY REFERENCES user_invite(id),
+  -- intended for votes to range from 0 - 100 with up to 3 decimal points of additional precision
+  points NUMERIC(6, 3),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

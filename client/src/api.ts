@@ -3,8 +3,8 @@ import { UserInfo } from './types';
 
 export function getUserInfo(token: string): Promise<AxiosResponse<UserInfo>> {
   return axios({
-    method: 'post',
-    url: 'http://localhost:8000/api/private/user_info',
+    method: 'get',
+    url: 'http://localhost:8000/api/private/user-info',
     headers: {
       'Authorization': `Bearer ${token}`
     }

@@ -47,7 +47,7 @@ fn not_found_page_route(_req: HttpRequest) -> Result<HttpResponse, Error> {
   )
 }
 
-fn login_route(
+fn create_poll_route(
   _data: web::Data<middleware::AppData>,
   _reg: HttpRequest,
 ) -> Result<HttpResponse, Error> {
@@ -92,9 +92,9 @@ fn main() {
           .service(
             web::scope("/private/")
               .wrap(middleware::Auth)
-              .route("/user_info", web::post().to(user_info_route)),
+              .route("/user-info", web::get().to(user_info_route))
+              .route("/poll", web::post().to(create_poll_route)),
           )
-          .route("/login", web::post().to(login_route)),
       )
       .default_service(web::route().to(not_found_page_route))
   })
