@@ -4,17 +4,7 @@ table! {
         email -> Varchar,
         title -> Varchar,
         poll_type -> Varchar,
-        created_at -> Timestamptz,
-        updated_at -> Timestamptz,
-    }
-}
-
-table! {
-    poll_instance (id) {
-        id -> Int4,
-        poll_id -> Int4,
-        has_started -> Bool,
-        title -> Varchar,
+        current_progress -> Progress,
         created_at -> Timestamptz,
         updated_at -> Timestamptz,
     }
@@ -23,7 +13,8 @@ table! {
 table! {
     proposal (id) {
         id -> Int4,
-        content -> Varchar,
+        summary -> Text,
+        full_description_link -> Nullable<Varchar>,
         poll_id -> Int4,
         created_at -> Timestamptz,
         updated_at -> Timestamptz,
@@ -35,6 +26,7 @@ table! {
         id -> Int4,
         email -> Varchar,
         poll_id -> Int4,
+        done_voting -> Bool,
         created_at -> Timestamptz,
     }
 }
@@ -50,21 +42,23 @@ table! {
 }
 
 table! {
-    vote (user_invite_id) {
+    vote (id) {
+        id -> Int4,
         user_invite_id -> Int4,
-        points -> Nullable<Numeric>,
+        proposal_id -> Int4,
+        points -> Numeric,
         created_at -> Timestamptz,
+        updated_at -> Timestamptz,
     }
 }
 
-joinable!(poll_instance -> poll (poll_id));
 joinable!(proposal -> poll (poll_id));
 joinable!(user_invite -> poll (poll_id));
+joinable!(vote -> proposal (proposal_id));
 joinable!(vote -> user_invite (user_invite_id));
 
 allow_tables_to_appear_in_same_query!(
     poll,
-    poll_instance,
     proposal,
     user_invite,
     users,

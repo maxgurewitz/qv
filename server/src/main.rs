@@ -49,9 +49,86 @@ fn not_found_page_route(_req: HttpRequest) -> Result<HttpResponse, Error> {
 
 fn create_poll_route(
   _data: web::Data<middleware::AppData>,
-  _reg: HttpRequest,
+  _req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  // create user if not found
+  Ok(
+    HttpResponse::Ok()
+      .content_type("application/json")
+      .body("{ \"message\": \"success\" }"),
+  )
+}
+
+fn get_poll_route(
+  _data: web::Data<middleware::AppData>,
+  req: HttpRequest,
+) -> Result<HttpResponse, Error> {
+  let poll_id = &req.match_info()["poll_id"];
+
+  Ok(
+    HttpResponse::Ok()
+      .content_type("application/json")
+      .body("{ \"message\": \"success\" }"),
+  )
+}
+
+fn update_proposal_route(
+  _data: web::Data<middleware::AppData>,
+  req: HttpRequest,
+) -> Result<HttpResponse, Error> {
+  let poll_id = &req.match_info()["proposal_id"];
+
+  Ok(
+    HttpResponse::Ok()
+      .content_type("application/json")
+      .body("{ \"message\": \"success\" }"),
+  )
+}
+
+fn create_proposal_route(
+  _data: web::Data<middleware::AppData>,
+  req: HttpRequest,
+) -> Result<HttpResponse, Error> {
+  let poll_id = &req.match_info()["poll_id"];
+
+  Ok(
+    HttpResponse::Ok()
+      .content_type("application/json")
+      .body("{ \"message\": \"success\" }"),
+  )
+}
+
+fn assign_vote_points_route(
+  _data: web::Data<middleware::AppData>,
+  req: HttpRequest,
+) -> Result<HttpResponse, Error> {
+  let proposal_id = &req.match_info()["proposal_id"];
+
+  Ok(
+    HttpResponse::Ok()
+      .content_type("application/json")
+      .body("{ \"message\": \"success\" }"),
+  )
+}
+
+fn finish_voting(
+  _data: web::Data<middleware::AppData>,
+  req: HttpRequest,
+) -> Result<HttpResponse, Error> {
+  let poll_id = &req.match_info()["poll_id"];
+
+  Ok(
+    HttpResponse::Ok()
+      .content_type("application/json")
+      .body("{ \"message\": \"success\" }"),
+  )
+}
+
+fn finish_poll(
+  _data: web::Data<middleware::AppData>,
+  req: HttpRequest,
+) -> Result<HttpResponse, Error> {
+  let poll_id = &req.match_info()["poll_id"];
+
   Ok(
     HttpResponse::Ok()
       .content_type("application/json")
@@ -90,10 +167,25 @@ fn main() {
       .service(
         web::scope("/api")
           .service(
-            web::scope("/private/")
+            web::scope("/private")
               .wrap(middleware::Auth)
               .route("/user-info", web::get().to(user_info_route))
-              .route("/poll", web::post().to(create_poll_route)),
+              .service(
+                web::scope("/poll")
+                  .route("/", web::post().to(create_poll_route))
+                  .service(
+                    web::scope("/{poll_id}")
+                      .route("/", web::get().to(get_poll_route))
+                      .route("/finish-voting", web::put().to(finish_voting))
+                      .route("/finish-poll", web::put().to(finish_poll))
+                      .route("/proposal", web::post().to(create_proposal_route))
+                  )
+              )
+              .service(
+                web::scope("/proposal/{proposal_id}")
+                  .route("/", web::put().to(update_proposal_route))
+                  .route("/vote", web::put().to(assign_vote_points_route))
+              )
           )
       )
       .default_service(web::route().to(not_found_page_route))

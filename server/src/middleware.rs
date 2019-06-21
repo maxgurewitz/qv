@@ -153,7 +153,8 @@ where
   fn call(&mut self, req: ServiceRequest) -> Self::Future {
       let user_info_fut = fetch_user_info_from_req(&req);
 
-      // modeled after example in actix-redix 
+      // modeled after example in actix-redix
+      // TODO is there a way to do this without cloning on every request?
       let mut srv = self.service.clone();
 
       Box::new(user_info_fut
