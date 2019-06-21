@@ -42,7 +42,7 @@ cargo install cargo-watch
 and started by,
 
 ```
-cargo watch -x run
+cargo watch -x run -w src
 ```
 
 ### Migrations

@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate serde_derive;
-#[macro_use]
 extern crate actix_web;
 extern crate diesel;
 
@@ -13,6 +12,7 @@ use actix_cors::Cors;
 
 use actix_web::error::ErrorInternalServerError;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web::web::{Json};
 use std::env;
 use std::sync::Arc;
 
@@ -136,6 +136,37 @@ fn finish_poll(
   )
 }
 
+fn user_search(
+  _data: web::Data<middleware::AppData>,
+  req: HttpRequest,
+) -> Result<HttpResponse, Error> {
+
+  Ok(
+    HttpResponse::Ok()
+      .content_type("application/json")
+      .body("{ \"message\": \"success\" }"),
+  )
+}
+
+#[derive(Deserialize, Debug)]
+struct InviteUserPayload {
+  pub email: String
+} 
+
+fn invite_user(
+  _data: web::Data<middleware::AppData>,
+  invite_user_payload: Json<InviteUserPayload>,
+  req: HttpRequest,
+) -> Result<HttpResponse, Error> {
+  let poll_id = &req.match_info()["poll_id"];
+
+  Ok(
+    HttpResponse::Ok()
+      .content_type("application/json")
+      .body("{ \"message\": \"success\" }"),
+  )
+}
+
 fn main() {
   let port = env::var("PORT").unwrap_or("8000".to_string());
 
@@ -170,12 +201,14 @@ fn main() {
             web::scope("/private")
               .wrap(middleware::Auth)
               .route("/user-info", web::get().to(user_info_route))
+              .route("/user-search", web::get().to(user_search))
               .service(
                 web::scope("/poll")
                   .route("/", web::post().to(create_poll_route))
                   .service(
                     web::scope("/{poll_id}")
                       .route("/", web::get().to(get_poll_route))
+                      .route("/invite-user", web::post().to(invite_user))
                       .route("/finish-voting", web::put().to(finish_voting))
                       .route("/finish-poll", web::put().to(finish_poll))
                       .route("/proposal", web::post().to(create_proposal_route))

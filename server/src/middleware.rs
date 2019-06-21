@@ -8,6 +8,7 @@ use actix_web::{Error, HttpMessage};
 use actix_utils::cloneable::CloneableService;
 use actix_web::web::BytesMut;
 use futures::{Future, Stream};
+use futures::future::{Either};
 
 use std::collections::HashMap;
 
@@ -129,10 +130,38 @@ fn get_user_info_args(req: &ServiceRequest) -> Result<(String, actix_web::client
 
 fn fetch_user_info_from_req(req: &ServiceRequest) -> impl Future<Item = Auth0Profile, Error = Error> {
   let user_info = get_user_info_args(&req);
+
   FutureResult::from(user_info)
-  .and_then(|(bearer, client)|
-    fetch_user_info(&client, &bearer)
-  )
+    .and_then(|(bearer, client)|
+      fetch_user_info(&client, &bearer)
+    )
+}
+
+#[cfg(debug_assertions)]
+mod debug {
+  use super::*;
+
+  static DEBUG_BEARER_TOKEN: &str = "debug_token";
+
+  pub fn fetch_mock_user_info_from_req(req: &ServiceRequest) -> impl Future<Item = Auth0Profile, Error = Error> {
+    let user_info = get_user_info_args(&req);
+
+    FutureResult::from(user_info)
+      .and_then(|(bearer, client)|
+        if bearer == DEBUG_BEARER_TOKEN {
+          let mock_profile = Auth0Profile { 
+            email: "fake@email.com".to_string(),
+            email_verified: Option::Some(true),
+            name: Option::Some("Bob Brisket".to_string()),
+            locale: Option::Some("en-US".to_string()), 
+            picture: Option::None
+          };
+          Either::A(FutureResult::from(Result::Ok(mock_profile)))
+        } else {
+          Either::B(fetch_user_info(&client, &bearer))
+        }
+      )
+  }
 }
 
 impl<S, B> Service for AuthMiddleware<S>
@@ -151,7 +180,11 @@ where
   }
 
   fn call(&mut self, req: ServiceRequest) -> Self::Future {
-      let user_info_fut = fetch_user_info_from_req(&req);
+      let user_info_fut = if cfg!(debug_assertions) {
+          Either::A(debug::fetch_mock_user_info_from_req(&req))
+        } else {
+          Either::B(fetch_user_info_from_req(&req))
+        };
 
       // modeled after example in actix-redix
       // TODO is there a way to do this without cloning on every request?
