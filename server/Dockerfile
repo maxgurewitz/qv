@@ -8,6 +8,8 @@ WORKDIR /usr/src/app
 
 # Copy our app into that directory
 COPY . /usr/src/app
+COPY wait-for.sh /usr/local/bin
+RUN chmod +x /usr/local/bin/wait-for.sh
 RUN cargo fetch
 
 # Build our app

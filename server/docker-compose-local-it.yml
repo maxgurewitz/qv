@@ -6,13 +6,12 @@ services:
       - ./tmp/db:/var/lib/postgresql/data
     expose:
       - 5432 
+
   server:
     build:
       context: .
       dockerfile: Dockerfile
-    command: cargo-watch -x run
-    volumes:
-      - ./server:/usr/src/app
+    command: bash wait-for.sh -t 60 db:5432 -- cargo-watch -w ./src -w Cargo.toml -x run
     environment: 
       - DATABASE_URL=postgres://postgres:@db/qv
     depends_on: 
@@ -21,6 +20,21 @@ services:
       - db
     ports:
       - 8000:8000 
+    volumes:
+      - .:/usr/src/app
+      - registry:/root/.cargo/registry
+
+  integration_test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bash wait-for.sh -t 60 server:8000 -- cargo-watch -w ./tests -x 'test integration'
+    environment: 
+      - APPLICATION_HOST="http://server:8000/api"
+    depends_on: 
+      - server
+    links:
+      - server
     volumes:
       - .:/usr/src/app
       - registry:/root/.cargo/registry
