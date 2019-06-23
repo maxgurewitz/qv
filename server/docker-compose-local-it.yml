@@ -10,7 +10,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: cargo run
+    command: cargo-watch -x run
+    volumes:
+      - ./server:/usr/src/app
     environment: 
       - DATABASE_URL=postgres://postgres:@db/qv
     depends_on: 

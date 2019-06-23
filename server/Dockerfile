@@ -1,5 +1,7 @@
 FROM rust
 
+RUN cargo install cargo-watch
+
 # Creating a directory to work from
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -9,4 +11,4 @@ COPY . /usr/src/app
 RUN cargo fetch
 
 # Build our app
-CMD ["cargo", "build"]
+VOLUME ["/usr/local/cargo"]
