@@ -6,6 +6,7 @@ WORKDIR /usr/src/app
 
 # Copy our app into that directory
 COPY . /usr/src/app
+RUN cargo fetch
 
 # Build our app
 CMD ["cargo", "build"]
