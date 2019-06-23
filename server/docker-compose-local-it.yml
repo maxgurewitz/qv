@@ -30,7 +30,7 @@ services:
       dockerfile: Dockerfile
     command: bash wait-for.sh -t 60 server:8000 -- cargo-watch -w ./tests -x 'test integration'
     environment: 
-      - APPLICATION_HOST="http://server:8000/api"
+      - BASE_URL="http://server:8000/api"
     depends_on: 
       - server
     links:

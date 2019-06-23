@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate serde_derive;
 extern crate actix_web;
+#[macro_use]
 extern crate diesel;
 
 mod db;
