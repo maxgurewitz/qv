@@ -52,3 +52,11 @@ Migrations are run with the diesel library which can be installed with the follo
 ```
 cargo install diesel_cli --no-default-features --features postgres
 ```
+
+### Testing
+
+In order to run integration tests,
+
+```
+docker-compose --file docker-compose-local-it.yml up
+```

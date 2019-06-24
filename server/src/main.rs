@@ -3,10 +3,12 @@ extern crate serde_derive;
 extern crate actix_web;
 #[macro_use]
 extern crate diesel;
+extern crate chrono;
 
 mod db;
 mod middleware;
 mod models;
+mod schema;
 
 use self::models::*;
 use actix_cors::Cors;
@@ -63,7 +65,7 @@ fn get_poll_route(
   _data: web::Data<middleware::AppData>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  let poll_id = &req.match_info()["poll_id"];
+  let _poll_id = &req.match_info()["poll_id"];
 
   Ok(
     HttpResponse::Ok()
@@ -76,7 +78,7 @@ fn update_proposal_route(
   _data: web::Data<middleware::AppData>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  let poll_id = &req.match_info()["proposal_id"];
+  let _poll_id = &req.match_info()["proposal_id"];
 
   Ok(
     HttpResponse::Ok()
@@ -89,7 +91,7 @@ fn create_proposal_route(
   _data: web::Data<middleware::AppData>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  let poll_id = &req.match_info()["poll_id"];
+  let _poll_id = &req.match_info()["poll_id"];
 
   Ok(
     HttpResponse::Ok()
@@ -102,7 +104,7 @@ fn assign_vote_points_route(
   _data: web::Data<middleware::AppData>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  let proposal_id = &req.match_info()["proposal_id"];
+  let _proposal_id = &req.match_info()["proposal_id"];
 
   Ok(
     HttpResponse::Ok()
@@ -115,7 +117,7 @@ fn finish_voting(
   _data: web::Data<middleware::AppData>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  let poll_id = &req.match_info()["poll_id"];
+  let _poll_id = &req.match_info()["poll_id"];
 
   Ok(
     HttpResponse::Ok()
@@ -128,7 +130,7 @@ fn finish_poll(
   _data: web::Data<middleware::AppData>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  let poll_id = &req.match_info()["poll_id"];
+  let _poll_id = &req.match_info()["poll_id"];
 
   Ok(
     HttpResponse::Ok()
@@ -139,7 +141,7 @@ fn finish_poll(
 
 fn user_search(
   _data: web::Data<middleware::AppData>,
-  req: HttpRequest,
+  _req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
 
   Ok(
@@ -156,10 +158,10 @@ struct InviteUserPayload {
 
 fn invite_user(
   _data: web::Data<middleware::AppData>,
-  invite_user_payload: Json<InviteUserPayload>,
+  _invite_user_payload: Json<InviteUserPayload>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  let poll_id = &req.match_info()["poll_id"];
+  let _poll_id = &req.match_info()["poll_id"];
 
   Ok(
     HttpResponse::Ok()
