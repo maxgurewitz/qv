@@ -222,10 +222,10 @@ fn main() {
               .route("/user-search", web::get().to(user_search))
               .service(
                 web::scope("/poll")
-                  .route("/", web::post().to(create_poll_route))
+                  .route("", web::post().to(create_poll_route))
                   .service(
                     web::scope("/{poll_id}")
-                      .route("/", web::get().to(get_poll_route))
+                      .route("", web::get().to(get_poll_route))
                       .route("/invite-user", web::post().to(invite_user))
                       .route("/finish-voting", web::put().to(finish_voting))
                       .route("/finish-poll", web::put().to(finish_poll))
@@ -234,7 +234,7 @@ fn main() {
               )
               .service(
                 web::scope("/proposal/{proposal_id}")
-                  .route("/", web::put().to(update_proposal_route))
+                  .route("", web::put().to(update_proposal_route))
                   .route("/vote", web::put().to(assign_vote_points_route))
               )
           )

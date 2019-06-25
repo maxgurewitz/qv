@@ -23,16 +23,17 @@ fn create_poll_integration() {
       poll_type: "qv".to_string(),
     };
 
-    // let poll: qv::models::Poll = test_resources
-    //   .http_client
-    //   .post(&format!("{}{}", test_resources.base_url, "/private/poll"))
-    //   .header("Authorization", utils::DEBUG_TOKEN)
-    //   .json(&create_poll_payload)
-    //   .send()
-    //   .unwrap()
-    //   .json()
-    //   .unwrap();
+    let create_poll_resource: qv::models::CreatePollResource = test_resources
+      .http_client
+      .post(&format!("{}{}", test_resources.base_url, "/private/poll"))
+      .header("Authorization", utils::DEBUG_TOKEN)
+      .json(&create_poll_payload)
+      .send()
+      .unwrap()
+      .json()
+      .unwrap();
 
-    // assert_eq!(poll.email, user_info.email);
-    // assert_eq!(poll.current_progress, qv::schema::ProgressEnum::NotStarted);
+    assert_eq!(create_poll_resource.poll.email, user_info_resource.user.email);
+
+    assert_eq!(create_poll_resource.poll.current_progress, qv::schema::ProgressEnum::NotStarted);
 }
