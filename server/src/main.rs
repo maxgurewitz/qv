@@ -9,22 +9,16 @@ mod db;
 mod middleware;
 mod models;
 mod schema;
-
-use self::models::*;
-use actix_cors::Cors;
-
+mod static_responses;
+use models::*;
+use static_responses::*;
 use actix_web::error::ErrorInternalServerError;
+use actix_cors::Cors;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web::web::{Json};
 use std::env;
 use std::sync::Arc;
-
-#[derive(Serialize)]
-struct HomePageResource {
-  user: Arc<Auth0Profile>,
-}
-
-static USER_NOT_FOUND_MSG: &str = "{ \"message\": \"Unable to locate user.\" }";
+use diesel::prelude::*;
 
 fn get_user_from_req(req: HttpRequest) -> Result<Arc<Auth0Profile>, Error> {
   let extensions = req.extensions();
@@ -32,33 +26,59 @@ fn get_user_from_req(req: HttpRequest) -> Result<Arc<Auth0Profile>, Error> {
   extensions
     .get::<middleware::AuthExtension>()
     .map(|e| e.user.clone())
-    .ok_or_else(|| ErrorInternalServerError(USER_NOT_FOUND_MSG))
+    .ok_or_else(|| ErrorInternalServerError(NOT_FOUND_MSG))
+}
+
+fn map_to_intern_service_err<T>(_: T) -> Error {
+  ErrorInternalServerError(INTERNAL_SERVICE_ERROR_MSG)
 }
 
 // routes
-fn user_info_route(req: HttpRequest) -> Result<web::Json<HomePageResource>, Error> {
+fn user_info_route(req: HttpRequest) -> Result<web::Json<UserInfoResource>, Error> {
   let user = get_user_from_req(req)?;
 
-  Ok(web::Json(HomePageResource { user: user }))
+  Ok(web::Json(UserInfoResource { user: user }))
 }
 
 fn not_found_page_route(_req: HttpRequest) -> Result<HttpResponse, Error> {
   Ok(
     HttpResponse::NotFound()
       .content_type("application/json")
-      .body("{ \"message\": \"route not found\" }"),
+      .body(NOT_FOUND_MSG),
   )
 }
 
 fn create_poll_route(
-  _data: web::Data<middleware::AppData>,
-  _req: HttpRequest,
-) -> Result<HttpResponse, Error> {
-  Ok(
-    HttpResponse::Ok()
-      .content_type("application/json")
-      .body("{ \"message\": \"success\" }"),
-  )
+  data: web::Data<middleware::AppData>,
+  payload: Json<CreatePollPayload>,
+  req: HttpRequest,
+) -> Result<web::Json<CreatePollResource>, Error> {
+  use schema::poll;
+
+  let connection = data
+    .pg_pool
+    .get()
+    .map_err(map_to_intern_service_err)?;
+  
+  let user_info = get_user_from_req(req)
+    .map_err(map_to_intern_service_err)?;
+
+  let new_poll = NewPoll {
+    email: &user_info.email,
+    title: &payload.title,
+    poll_type: &payload.poll_type,
+  };
+
+  let poll_result = diesel::insert_into(poll::table)
+    .values(&new_poll)
+    .get_result::<Poll>(&*connection)
+    .map_err(map_to_intern_service_err)?;
+
+  let resource = CreatePollResource {
+    poll: poll_result
+  };
+
+  Ok(web::Json(resource))
 }
 
 fn get_poll_route(
@@ -70,7 +90,7 @@ fn get_poll_route(
   Ok(
     HttpResponse::Ok()
       .content_type("application/json")
-      .body("{ \"message\": \"success\" }"),
+      .body(GENERIC_SUCCESS_MSG),
   )
 }
 
@@ -150,11 +170,6 @@ fn user_search(
       .body("{ \"message\": \"success\" }"),
   )
 }
-
-#[derive(Deserialize, Debug)]
-struct InviteUserPayload {
-  pub email: String
-} 
 
 fn invite_user(
   _data: web::Data<middleware::AppData>,

@@ -1,5 +1,6 @@
 use super::db;
 use super::models::Auth0Profile;
+use super::static_responses::*;
 use actix_service::{Service, Transform};
 use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::error::{ErrorInternalServerError, ErrorUnauthorized};
@@ -113,10 +114,6 @@ fn parse_bearer(req: &ServiceRequest) -> Option<String> {
 
   Option::from(token.to_string())
 }
-
-static MISSING_HEADER_MSG: &str = "{ \"message\": \"Must pass Authorization Bearer header.\" }";
-static INVALID_TOKEN_MSG: &str = "{ \"message\": \"Invalid Bearer header.\" }";
-static INTERNAL_SERVICE_ERROR_MSG: &str = "{ \"message\": \"Oops something went wrong.\" }";
 
 fn get_user_info_args(req: &ServiceRequest) -> Result<(String, actix_web::client::Client), actix_web::Error> {
   let bearer = parse_bearer(&req).ok_or(ErrorUnauthorized(MISSING_HEADER_MSG))?;

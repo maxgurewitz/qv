@@ -60,3 +60,5 @@ In order to run integration tests,
 ```
 docker-compose --file docker-compose-local-it.yml up
 ```
+
+This command spins up several docker images, one responsible for watching for changes to the application server, the other watching for changes to the tests.
