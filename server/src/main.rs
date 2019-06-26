@@ -12,7 +12,7 @@ mod schema;
 mod static_responses;
 use models::*;
 use static_responses::*;
-use actix_web::error::ErrorInternalServerError;
+use actix_web::error::{ErrorInternalServerError, ErrorBadRequest};
 use actix_cors::Cors;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web::web::{Json};
@@ -52,7 +52,7 @@ fn create_poll_route(
   data: web::Data<middleware::AppData>,
   payload: Json<CreatePollPayload>,
   req: HttpRequest,
-) -> Result<web::Json<CreatePollResource>, Error> {
+) -> Result<Json<CreatePollResource>, Error> {
   use schema::poll;
 
   let connection = data
@@ -69,16 +69,12 @@ fn create_poll_route(
     poll_type: &payload.poll_type,
   };
 
-  let poll_result = diesel::insert_into(poll::table)
+  let poll = diesel::insert_into(poll::table)
     .values(&new_poll)
     .get_result::<Poll>(&*connection)
     .map_err(map_to_intern_service_err)?;
 
-  let resource = CreatePollResource {
-    poll: poll_result
-  };
-
-  Ok(web::Json(resource))
+  Ok(web::Json(CreatePollResource { poll }))
 }
 
 fn get_poll_route(
@@ -108,16 +104,32 @@ fn update_proposal_route(
 }
 
 fn create_proposal_route(
-  _data: web::Data<middleware::AppData>,
+  data: web::Data<middleware::AppData>,
+  payload: Json<CreateProposalPayload>,
   req: HttpRequest,
-) -> Result<HttpResponse, Error> {
-  let _poll_id = &req.match_info()["poll_id"];
+) -> Result<Json<CreateProposalResource>, Error> {
+  use schema::proposal;
 
-  Ok(
-    HttpResponse::Ok()
-      .content_type("application/json")
-      .body("{ \"message\": \"success\" }"),
-  )
+  let poll_id = &req.match_info()["poll_id"].parse::<i32>()
+    .map_err(|_| ErrorBadRequest("{ \"message\": \"poll_id path param must be an integer\" }"))?;
+
+  let connection = data
+    .pg_pool
+    .get()
+    .map_err(map_to_intern_service_err)?;
+
+  let new_proposal = NewProposal {
+    summary: &payload.summary,
+    full_description_link: payload.full_description_link.clone(),
+    poll_id: poll_id,
+  };
+
+  let proposal = diesel::insert_into(proposal::table)
+    .values(&new_proposal)
+    .get_result::<Proposal>(&*connection)
+    .map_err(map_to_intern_service_err)?;
+
+  Ok(Json(CreateProposalResource { proposal }))
 }
 
 fn assign_vote_points_route(

@@ -36,4 +36,15 @@ fn create_poll_integration() {
     assert_eq!(create_poll_resource.poll.email, user_info_resource.user.email);
 
     assert_eq!(create_poll_resource.poll.current_progress, qv::schema::ProgressEnum::NotStarted);
+
+    let create_proposal_resource: qv::models::CreatePollResource = test_resources
+      .http_client
+      .post(&format!("{}{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id, "/proposal"))
+      .header("Authorization", utils::DEBUG_TOKEN)
+      .json(&create_poll_payload)
+      .send()
+      .unwrap()
+      .json()
+      .unwrap();
+
 }
