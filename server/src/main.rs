@@ -9,6 +9,7 @@ mod db;
 mod middleware;
 mod models;
 mod schema;
+mod sql_enum_types;
 mod static_responses;
 use models::*;
 use static_responses::*;
@@ -145,7 +146,7 @@ fn assign_vote_points_route(
   )
 }
 
-fn finish_voting(
+fn start_poll(
   _data: web::Data<middleware::AppData>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
@@ -239,7 +240,7 @@ fn main() {
                     web::scope("/{poll_id}")
                       .route("", web::get().to(get_poll_route))
                       .route("/invite-user", web::post().to(invite_user))
-                      .route("/finish-voting", web::put().to(finish_voting))
+                      .route("/start-poll", web::put().to(start_poll))
                       .route("/finish-poll", web::put().to(finish_poll))
                       .route("/proposal", web::post().to(create_proposal_route))
                   )

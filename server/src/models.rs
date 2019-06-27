@@ -1,6 +1,7 @@
 use super::schema::*;
 use chrono::prelude::*;
 use std::sync::Arc;
+use super::sql_enum_types::*;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Auth0Profile {

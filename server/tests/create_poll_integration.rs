@@ -37,14 +37,21 @@ fn create_poll_integration() {
 
     assert_eq!(create_poll_resource.poll.current_progress, qv::schema::ProgressEnum::NotStarted);
 
-    let create_proposal_resource: qv::models::CreatePollResource = test_resources
+    let create_proposal_resource = qv::models::CreateProposalPayload {
+      summary: "My special proposal.".to_string(),
+      full_description_link: Option::Some("https://proposal-website.com".to_string()),
+    };
+
+    let create_proposal_resource: qv::models::CreateProposalResource = test_resources
       .http_client
       .post(&format!("{}{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id, "/proposal"))
       .header("Authorization", utils::DEBUG_TOKEN)
-      .json(&create_poll_payload)
+      .json(&create_proposal_resource)
       .send()
       .unwrap()
       .json()
       .unwrap();
 
+    assert_eq!(create_proposal_resource.proposal.poll_id, create_poll_resource.poll.id);
+    
 }
