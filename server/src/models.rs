@@ -33,6 +33,15 @@ pub struct Proposal {
   pub updated_at: DateTime<Utc>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Queryable)]
+pub struct UserInvite {
+  pub id: i32,
+  pub email: String,
+  pub poll_id: i32,
+  pub created_at: DateTime<Utc>,
+  pub updated_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreatePollPayload {
   pub title: String,
@@ -55,6 +64,12 @@ pub struct NewProposal<'a> {
   pub poll_id: &'a i32,
 }
 
+#[derive(Insertable)]
+#[table_name="user_invite"]
+pub struct NewUserInvite<'a> {
+  pub email: &'a str,
+  pub poll_id: &'a i32,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InviteUserPayload {

@@ -1,7 +1,7 @@
 use reqwest;
 use std::env;
 
-pub static DEBUG_TOKEN: &str = "Bearer debug_token";
+pub static DEBUG_TOKEN_1: &str = "Bearer debug_token_1";
 
 pub struct TestResources {
   pub http_client: reqwest::Client,

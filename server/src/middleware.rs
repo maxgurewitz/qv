@@ -138,18 +138,29 @@ fn fetch_user_info_from_req(req: &ServiceRequest) -> impl Future<Item = Auth0Pro
 mod debug {
   use super::*;
 
-  static DEBUG_BEARER_TOKEN: &str = "debug_token";
+  static DEBUG_BEARER_TOKEN_1: &str = "debug_token_1";
+
+  static DEBUG_BEARER_TOKEN_2: &str = "debug_token_2";
 
   pub fn fetch_mock_user_info_from_req(req: &ServiceRequest) -> impl Future<Item = Auth0Profile, Error = Error> {
     let user_info = get_user_info_args(&req);
 
     FutureResult::from(user_info)
       .and_then(|(bearer, client)|
-        if bearer == DEBUG_BEARER_TOKEN {
+        if bearer == DEBUG_BEARER_TOKEN_1 {
           let mock_profile = Auth0Profile { 
-            email: "fake@email.com".to_string(),
+            email: "fake_1@email.com".to_string(),
             email_verified: Option::Some(true),
             name: Option::Some("Bob Brisket".to_string()),
+            locale: Option::Some("en-US".to_string()), 
+            picture: Option::None
+          };
+          Either::A(FutureResult::from(Result::Ok(mock_profile)))
+        } else if bearer == DEBUG_BEARER_TOKEN_2 {
+          let mock_profile = Auth0Profile { 
+            email: "fake_2@email.com".to_string(),
+            email_verified: Option::Some(true),
+            name: Option::Some("Penelope Prosciutto".to_string()),
             locale: Option::Some("en-US".to_string()), 
             picture: Option::None
           };

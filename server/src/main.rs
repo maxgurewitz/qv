@@ -185,11 +185,29 @@ fn user_search(
 }
 
 fn invite_user(
-  _data: web::Data<middleware::AppData>,
-  _invite_user_payload: Json<InviteUserPayload>,
+  data: web::Data<middleware::AppData>,
+  payload: Json<InviteUserPayload>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  let _poll_id = &req.match_info()["poll_id"];
+  use schema::user_invite;
+
+  let poll_id = &req.match_info()["poll_id"].parse::<i32>()
+    .map_err(|_| ErrorBadRequest("{ \"message\": \"poll_id path param must be an integer\" }"))?;
+
+  let connection = data
+    .pg_pool
+    .get()
+    .map_err(map_to_intern_service_err)?;
+
+  let new_user_invite = NewUserInvite {
+    email: &payload.email,
+    poll_id: &poll_id
+  };
+
+  diesel::insert_into(user_invite::table)
+    .values(&new_user_invite)
+    .execute(&*connection)
+    .map_err(map_to_intern_service_err)?;
 
   Ok(
     HttpResponse::Ok()

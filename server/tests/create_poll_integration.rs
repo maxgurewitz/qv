@@ -9,7 +9,7 @@ fn create_poll_integration() {
     let user_info_resource: qv::models::UserInfoResource = test_resources
       .http_client
       .get(&format!("{}{}", test_resources.base_url, "/private/user-info"))
-      .header("Authorization", utils::DEBUG_TOKEN)
+      .header("Authorization", utils::DEBUG_TOKEN_1)
       .send()
       .unwrap()
       .json()
@@ -26,7 +26,7 @@ fn create_poll_integration() {
     let create_poll_resource: qv::models::CreatePollResource = test_resources
       .http_client
       .post(&format!("{}{}", test_resources.base_url, "/private/poll"))
-      .header("Authorization", utils::DEBUG_TOKEN)
+      .header("Authorization", utils::DEBUG_TOKEN_1)
       .json(&create_poll_payload)
       .send()
       .unwrap()
@@ -35,9 +35,9 @@ fn create_poll_integration() {
 
     assert_eq!(create_poll_resource.poll.email, user_info_resource.user.email);
 
-    assert_eq!(create_poll_resource.poll.current_progress, qv::schema::ProgressEnum::NotStarted);
+    assert_eq!(create_poll_resource.poll.current_progress, qv::sql_enum_types::ProgressEnum::NotStarted);
 
-    let create_proposal_resource = qv::models::CreateProposalPayload {
+    let create_proposal_payload = qv::models::CreateProposalPayload {
       summary: "My special proposal.".to_string(),
       full_description_link: Option::Some("https://proposal-website.com".to_string()),
     };
@@ -45,8 +45,8 @@ fn create_poll_integration() {
     let create_proposal_resource: qv::models::CreateProposalResource = test_resources
       .http_client
       .post(&format!("{}{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id, "/proposal"))
-      .header("Authorization", utils::DEBUG_TOKEN)
-      .json(&create_proposal_resource)
+      .header("Authorization", utils::DEBUG_TOKEN_1)
+      .json(&create_proposal_payload)
       .send()
       .unwrap()
       .json()
@@ -54,4 +54,18 @@ fn create_poll_integration() {
 
     assert_eq!(create_proposal_resource.proposal.poll_id, create_poll_resource.poll.id);
     
+    let invite_user_payload = qv::models::InviteUserPayload {
+      email: "fake_2@email.com".to_string()
+    };
+
+    let invite_user_response: reqwest::Response = test_resources
+      .http_client
+      .post(&format!("{}{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id, "/invite-user"))
+      .header("Authorization", utils::DEBUG_TOKEN_1)
+      .json(&invite_user_payload)
+      .send()
+      .unwrap();
+
+    assert_eq!(invite_user_response.status(), 200);
+
 }
