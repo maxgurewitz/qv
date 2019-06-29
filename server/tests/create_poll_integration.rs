@@ -53,6 +53,8 @@ fn create_poll_integration() {
       .unwrap();
 
     assert_eq!(create_proposal_resource.proposal.poll_id, create_poll_resource.poll.id);
+
+    // TODO try to vote without user invite check 403
     
     let invite_user_payload = qv::models::InviteUserPayload {
       email: "fake_2@email.com".to_string()
@@ -68,4 +70,15 @@ fn create_poll_integration() {
 
     assert_eq!(invite_user_response.status(), 200);
 
+    // TODO try to vote without starting poll check 403
+
+    let start_poll_response: reqwest::Response = test_resources
+      .http_client
+      .put(&format!("{}{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id, "/start-poll"))
+      .header("Authorization", utils::DEBUG_TOKEN_1)
+      .json(&invite_user_payload)
+      .send()
+      .unwrap();
+
+    assert_eq!(start_poll_response.status(), 200);
 }

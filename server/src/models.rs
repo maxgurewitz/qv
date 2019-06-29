@@ -12,7 +12,7 @@ pub struct Auth0Profile {
   pub picture: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Queryable)]
+#[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, AsChangeset)]
 pub struct Poll {
   pub id: i32,
   pub email: String,

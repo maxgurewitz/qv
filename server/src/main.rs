@@ -13,7 +13,7 @@ mod sql_enum_types;
 mod static_responses;
 use models::*;
 use static_responses::*;
-use actix_web::error::{ErrorInternalServerError, ErrorBadRequest};
+use actix_web::error::{ErrorInternalServerError};
 use actix_cors::Cors;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web::web::{Json};
@@ -107,12 +107,9 @@ fn update_proposal_route(
 fn create_proposal_route(
   data: web::Data<middleware::AppData>,
   payload: Json<CreateProposalPayload>,
-  req: HttpRequest,
+  poll_id: actix_web::web::Path<i32>,
 ) -> Result<Json<CreateProposalResource>, Error> {
   use schema::proposal;
-
-  let poll_id = &req.match_info()["poll_id"].parse::<i32>()
-    .map_err(|_| ErrorBadRequest("{ \"message\": \"poll_id path param must be an integer\" }"))?;
 
   let connection = data
     .pg_pool
@@ -122,7 +119,7 @@ fn create_proposal_route(
   let new_proposal = NewProposal {
     summary: &payload.summary,
     full_description_link: payload.full_description_link.clone(),
-    poll_id: poll_id,
+    poll_id: &poll_id,
   };
 
   let proposal = diesel::insert_into(proposal::table)
@@ -148,8 +145,11 @@ fn assign_vote_points_route(
 
 fn start_poll(
   _data: web::Data<middleware::AppData>,
+  poll_id: actix_web::web::Path<i32>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
+  use schema::user_invite;
+    
   let _poll_id = &req.match_info()["poll_id"];
 
   Ok(
@@ -187,12 +187,9 @@ fn user_search(
 fn invite_user(
   data: web::Data<middleware::AppData>,
   payload: Json<InviteUserPayload>,
-  req: HttpRequest,
+  poll_id: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
   use schema::user_invite;
-
-  let poll_id = &req.match_info()["poll_id"].parse::<i32>()
-    .map_err(|_| ErrorBadRequest("{ \"message\": \"poll_id path param must be an integer\" }"))?;
 
   let connection = data
     .pg_pool
