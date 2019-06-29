@@ -54,7 +54,7 @@ fn create_poll_route(
   payload: Json<CreatePollPayload>,
   req: HttpRequest,
 ) -> Result<Json<CreatePollResource>, Error> {
-  use schema::poll;
+  use schema::polls;
 
   let connection = data
     .pg_pool
@@ -70,7 +70,7 @@ fn create_poll_route(
     poll_type: &payload.poll_type,
   };
 
-  let poll = diesel::insert_into(poll::table)
+  let poll = diesel::insert_into(polls::table)
     .values(&new_poll)
     .get_result::<Poll>(&*connection)
     .map_err(map_to_intern_service_err)?;
@@ -109,7 +109,7 @@ fn create_proposal_route(
   payload: Json<CreateProposalPayload>,
   poll_id: actix_web::web::Path<i32>,
 ) -> Result<Json<CreateProposalResource>, Error> {
-  use schema::proposal;
+  use schema::proposals;
 
   let connection = data
     .pg_pool
@@ -122,7 +122,7 @@ fn create_proposal_route(
     poll_id: &poll_id,
   };
 
-  let proposal = diesel::insert_into(proposal::table)
+  let proposal = diesel::insert_into(proposals::table)
     .values(&new_proposal)
     .get_result::<Proposal>(&*connection)
     .map_err(map_to_intern_service_err)?;
@@ -148,10 +148,12 @@ fn start_poll(
   poll_id: actix_web::web::Path<i32>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  use schema::user_invite;
-    
-  let _poll_id = &req.match_info()["poll_id"];
+  // use schema::poll;
+  // use poll::dsl::*;
 
+  // also filter by current status
+  // diesel::update(poll.filter(id.eq(poll_id))).set(poll::current_progress.eq(sql_enum_types::ProgressEnum::InProgress));
+    
   Ok(
     HttpResponse::Ok()
       .content_type("application/json")
@@ -189,7 +191,7 @@ fn invite_user(
   payload: Json<InviteUserPayload>,
   poll_id: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
-  use schema::user_invite;
+  use schema::user_invites;
 
   let connection = data
     .pg_pool
@@ -201,7 +203,7 @@ fn invite_user(
     poll_id: &poll_id
   };
 
-  diesel::insert_into(user_invite::table)
+  diesel::insert_into(user_invites::table)
     .values(&new_user_invite)
     .execute(&*connection)
     .map_err(map_to_intern_service_err)?;

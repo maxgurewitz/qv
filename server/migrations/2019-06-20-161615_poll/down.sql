@@ -1,6 +1,6 @@
 -- This file should undo anything in `up.sql`
-drop TABLE vote;
-drop TABLE user_invite;
-drop TABLE proposal;
-drop TABLE poll;
+drop TABLE votes;
+drop TABLE user_invites;
+drop TABLE proposals;
+drop TABLE polls;
 drop TYPE progress;

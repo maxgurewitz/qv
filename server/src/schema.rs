@@ -1,10 +1,10 @@
 use super::sql_enum_types;
 
 table! {
-  use diesel::sql_types::*;
-  use super::super::sql_enum_types::Progress;
+   use diesel::sql_types::*;
+   use super::super::sql_enum_types::Progress;
 
-  poll (id) {
+    polls (id) {
         id -> Int4,
         email -> Varchar,
         title -> Varchar,
@@ -16,7 +16,7 @@ table! {
 }
 
 table! {
-    proposal (id) {
+    proposals (id) {
         id -> Int4,
         summary -> Text,
         full_description_link -> Nullable<Varchar>,
@@ -27,11 +27,10 @@ table! {
 }
 
 table! {
-    user_invite (id) {
+    user_invites (id) {
         id -> Int4,
         email -> Varchar,
         poll_id -> Int4,
-        done_voting -> Bool,
         created_at -> Timestamptz,
     }
 }
@@ -47,7 +46,7 @@ table! {
 }
 
 table! {
-    vote (id) {
+    votes (id) {
         id -> Int4,
         user_invite_id -> Int4,
         proposal_id -> Int4,
@@ -57,15 +56,15 @@ table! {
     }
 }
 
-joinable!(proposal -> poll (poll_id));
-joinable!(user_invite -> poll (poll_id));
-joinable!(vote -> proposal (proposal_id));
-joinable!(vote -> user_invite (user_invite_id));
+joinable!(proposals -> polls (poll_id));
+joinable!(user_invites -> polls (poll_id));
+joinable!(votes -> proposals (proposal_id));
+joinable!(votes -> user_invites (user_invite_id));
 
 allow_tables_to_appear_in_same_query!(
-    poll,
-    proposal,
-    user_invite,
+    polls,
+    proposals,
+    user_invites,
     users,
-    vote,
+    votes,
 );

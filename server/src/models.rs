@@ -49,7 +49,7 @@ pub struct CreatePollPayload {
 }
 
 #[derive(Insertable)]
-#[table_name="poll"]
+#[table_name="polls"]
 pub struct NewPoll<'a> {
   pub email: &'a str,
   pub title: &'a str,
@@ -57,7 +57,7 @@ pub struct NewPoll<'a> {
 }
 
 #[derive(Insertable)]
-#[table_name="proposal"]
+#[table_name="proposals"]
 pub struct NewProposal<'a> {
   pub summary: &'a str,
   pub full_description_link: Option<String>,
@@ -65,7 +65,7 @@ pub struct NewProposal<'a> {
 }
 
 #[derive(Insertable)]
-#[table_name="user_invite"]
+#[table_name="user_invites"]
 pub struct NewUserInvite<'a> {
   pub email: &'a str,
   pub poll_id: &'a i32,
