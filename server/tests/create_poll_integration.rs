@@ -71,7 +71,7 @@ fn create_poll_integration() {
     assert_eq!(invite_user_response.status(), 200);
 
     // TODO try to vote without starting poll check 403
-
+    // TODO try starting already started poll check 404
     let start_poll_response: reqwest::Response = test_resources
       .http_client
       .put(&format!("{}{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id, "/start-poll"))

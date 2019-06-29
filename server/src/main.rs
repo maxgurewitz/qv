@@ -144,16 +144,27 @@ fn assign_vote_points_route(
 }
 
 fn start_poll(
-  _data: web::Data<middleware::AppData>,
+  data: web::Data<middleware::AppData>,
   poll_id: actix_web::web::Path<i32>,
-  req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  // use schema::poll;
-  // use poll::dsl::*;
+  use schema::polls;
+  use schema::polls::dsl::*;
 
-  // also filter by current status
-  // diesel::update(poll.filter(id.eq(poll_id))).set(poll::current_progress.eq(sql_enum_types::ProgressEnum::InProgress));
-    
+  let connection = data
+    .pg_pool
+    .get()
+    .map_err(map_to_intern_service_err)?;
+
+  let inner_poll_id = poll_id.into_inner();
+  let target = id.eq(inner_poll_id).and(current_progress.eq(sql_enum_types::ProgressEnum::NotStarted));
+
+  diesel::update(polls)
+    .filter(target)
+    .set(polls::current_progress.eq(sql_enum_types::ProgressEnum::InProgress))
+    .execute(&*connection)
+    // TODO handle 404's
+    .map_err(map_to_intern_service_err)?; 
+
   Ok(
     HttpResponse::Ok()
       .content_type("application/json")
