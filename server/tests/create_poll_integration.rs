@@ -81,4 +81,22 @@ fn create_poll_integration() {
       .unwrap();
 
     assert_eq!(start_poll_response.status(), 200);
+
+    let create_vote_payload = qv::models::CreateVotePayload {
+      points: 9.0
+    };
+
+    let vote_response: reqwest::Response = test_resources
+      .http_client
+      .put(&format!("{}{}{}{}", test_resources.base_url, "/private/proposal/", create_proposal_resource.proposal.id, "/vote"))
+      .header("Authorization", utils::DEBUG_TOKEN_1)
+      .json(&create_vote_payload)
+      .send()
+      .unwrap();
+
+    assert_eq!(vote_response.status(), 200);
+    // debug user 2 votes
+    // TODO try voting with more than available points
+    // admin user 1 finishes poll
+    // get poll, which should optionally include vote totals when poll is finished.
 }

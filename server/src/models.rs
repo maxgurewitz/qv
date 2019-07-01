@@ -93,6 +93,11 @@ pub struct CreateProposalPayload {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct CreateVotePayload {
+  pub points: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CreateProposalResource {
   pub proposal: Proposal,
 }

@@ -131,11 +131,39 @@ fn create_proposal_route(
 }
 
 fn assign_vote_points_route(
-  _data: web::Data<middleware::AppData>,
+  data: web::Data<middleware::AppData>,
   req: HttpRequest,
+  proposal_id: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
-  let _proposal_id = &req.match_info()["proposal_id"];
+  use schema::user_invites;
 
+  let connection = data
+    .pg_pool
+    .get()
+    .map_err(map_to_intern_service_err)?;
+
+  let user_info = get_user_from_req(req)
+    .map_err(map_to_intern_service_err)?;
+
+  connection.transaction::<_, diesel::result::Error, _>(|| {
+    // let user_invite = user_invites.filter(user_invites::dsl::)
+    Ok(())
+  });
+  // begin transaction
+  // select and lock rows by email and proposal ids
+  // 
+
+  Ok(
+    HttpResponse::Ok()
+      .content_type("application/json")
+      .body("{ \"message\": \"success\" }"),
+  )
+}
+
+fn get_my_votes(
+  data: web::Data<middleware::AppData>,
+  _poll_id: actix_web::web::Path<i32>,
+) -> Result<HttpResponse, Error> {
   Ok(
     HttpResponse::Ok()
       .content_type("application/json")
@@ -267,6 +295,7 @@ fn main() {
                   .service(
                     web::scope("/{poll_id}")
                       .route("", web::get().to(get_poll_route))
+                      .route("/my-votes", web::get().to(get_my_votes))
                       .route("/invite-user", web::post().to(invite_user))
                       .route("/start-poll", web::put().to(start_poll))
                       .route("/finish-poll", web::put().to(finish_poll))
