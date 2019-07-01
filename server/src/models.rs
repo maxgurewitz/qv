@@ -33,13 +33,12 @@ pub struct Proposal {
   pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Queryable)]
+#[derive(Debug, Serialize, Deserialize, Queryable, Identifiable)]
 pub struct UserInvite {
   pub id: i32,
   pub email: String,
   pub poll_id: i32,
   pub created_at: DateTime<Utc>,
-  pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

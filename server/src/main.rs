@@ -135,7 +135,7 @@ fn assign_vote_points_route(
   req: HttpRequest,
   proposal_id: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
-  use schema::user_invites;
+  use schema::{user_invites, proposals, user_invite_locks, polls};
 
   let connection = data
     .pg_pool
@@ -146,7 +146,17 @@ fn assign_vote_points_route(
     .map_err(map_to_intern_service_err)?;
 
   connection.transaction::<_, diesel::result::Error, _>(|| {
-    // let user_invite = user_invites.filter(user_invites::dsl::)
+    let user_invite_id = user_invites::table
+      .inner_join(polls::table.inner_join(proposals::table))
+      .filter(proposals::dsl::id.eq(&proposal_id.into_inner())
+        .and(user_invites::dsl::email.eq(&user_info.email)))
+      .select(user_invites::id)
+      .load::<i32>(&*connection);
+
+    // select user invite lock with for update lock
+    // select sum of votes, if exceeding 100 exit
+    // upsert vote for proposal with new vote value
+    // let user_invite_lock = user_invite_locks.filter(user_invite_locks::dsl::)
     Ok(())
   });
   // begin transaction
