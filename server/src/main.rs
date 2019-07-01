@@ -151,7 +151,12 @@ fn assign_vote_points_route(
       .filter(proposals::dsl::id.eq(&proposal_id.into_inner())
         .and(user_invites::dsl::email.eq(&user_info.email)))
       .select(user_invites::id)
-      .load::<i32>(&*connection);
+      .first::<i32>(&*connection)?;
+
+    let _lock = user_invite_locks::table
+      .find(&user_invite_id)
+      .for_update()
+      .execute(&*connection)?;
 
     // select user invite lock with for update lock
     // select sum of votes, if exceeding 100 exit
