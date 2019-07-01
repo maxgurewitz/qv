@@ -34,6 +34,14 @@ CREATE TABLE user_invites (
 
 CREATE UNIQUE INDEX user_invites_index ON user_invites(email, poll_id);
 
+CREATE TABLE user_invite_locks (
+  id SERIAL PRIMARY KEY,
+  user_invite_id INTEGER NOT NULL REFERENCES user_invites(id),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX user_invite_locks_index ON user_invite_locks(user_invite_id);
+
 CREATE TABLE votes (
   id SERIAL PRIMARY KEY,
   user_invite_id INTEGER NOT NULL REFERENCES user_invites(id),
