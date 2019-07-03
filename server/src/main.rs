@@ -12,6 +12,8 @@ mod schema;
 mod sql_enum_types;
 mod static_responses;
 use models::*;
+use diesel::dsl::{sum};
+use bigdecimal::{BigDecimal};
 use static_responses::*;
 use actix_web::error::{ErrorInternalServerError};
 use actix_cors::Cors;
@@ -135,7 +137,7 @@ fn assign_vote_points_route(
   req: HttpRequest,
   proposal_id: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
-  use schema::{user_invites, proposals, user_invite_locks, polls};
+  use schema::{user_invites, proposals, user_invite_locks, polls, votes};
 
   let connection = data
     .pg_pool
@@ -157,6 +159,12 @@ fn assign_vote_points_route(
       .find(&user_invite_id)
       .for_update()
       .execute(&*connection)?;
+
+    let vote_sum = votes::table
+      .filter(votes::dsl::user_invite_id.eq(&user_invite_id))
+      .select(sum(votes::dsl::points))
+      .first::<Option<f64>>(&*connection)?
+      .unwrap_or(0.0);
 
     // select user invite lock with for update lock
     // select sum of votes, if exceeding 100 exit

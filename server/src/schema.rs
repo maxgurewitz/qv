@@ -58,7 +58,7 @@ table! {
         id -> Int4,
         user_invite_id -> Int4,
         proposal_id -> Int4,
-        points -> Numeric,
+        points -> Float8,
         created_at -> Timestamptz,
         updated_at -> Timestamptz,
     }
@@ -71,10 +71,10 @@ joinable!(votes -> proposals (proposal_id));
 joinable!(votes -> user_invites (user_invite_id));
 
 allow_tables_to_appear_in_same_query!(
-  polls,
-  proposals,
-  user_invite_locks,
-  user_invites,
-  users,
-  votes,
+    polls,
+    proposals,
+    user_invite_locks,
+    user_invites,
+    users,
+    votes,
 );

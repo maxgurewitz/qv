@@ -46,8 +46,7 @@ CREATE TABLE votes (
   id SERIAL PRIMARY KEY,
   user_invite_id INTEGER NOT NULL REFERENCES user_invites(id),
   proposal_id INTEGER NOT NULL REFERENCES proposals(id),
-  -- intended for votes to range from 0 - 100 with up to 4 decimal points of additional precision
-  points NUMERIC(7, 4) NOT NULL,
+  points DOUBLE PRECISION NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
