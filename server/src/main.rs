@@ -72,7 +72,6 @@ fn create_poll_route(
     poll_type: &payload.poll_type,
   };
 
-  // FIXME create lock in transation
   let poll = diesel::insert_into(polls::table)
     .values(&new_poll)
     .get_result::<Poll>(&*connection)
@@ -275,27 +274,39 @@ fn invite_user(
   payload: Json<InviteUserPayload>,
   poll_id: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
-  use schema::user_invites;
+  use schema::{user_invites, user_invite_locks};
 
   let connection = data
     .pg_pool
     .get()
     .map_err(map_to_internal_service_err)?;
 
-  let new_user_invite = NewUserInvite {
-    email: &payload.email,
-    poll_id: &poll_id
-  };
+  connection.transaction::<_, diesel::result::Error, _>(|| {
+    let new_user_invite = NewUserInvite {
+      email: &payload.email,
+      poll_id: &poll_id
+    };
 
-  diesel::insert_into(user_invites::table)
-    .values(&new_user_invite)
-    .execute(&*connection)
-    .map_err(map_to_internal_service_err)?;
+    let user_invite = diesel::insert_into(user_invites::table)
+      .values(&new_user_invite)
+      .get_result::<UserInvite>(&*connection)?;
+
+    let new_user_invite_lock = NewUserInviteLock {
+      user_invite_id: &user_invite.id
+    };
+
+    diesel::insert_into(user_invite_locks::table)
+      .values(&new_user_invite_lock)
+      .execute(&*connection)?;
+
+    Ok(())
+  })
+  .map_err(map_to_internal_service_err)?;
 
   Ok(
     HttpResponse::Ok()
       .content_type("application/json")
-      .body("{ \"message\": \"success\" }"),
+      .json(GenericJsonResponse { message: "Succesfully invited user.".to_string() }),
   )
 }
 

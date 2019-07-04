@@ -71,6 +71,12 @@ pub struct NewUserInvite<'a> {
 }
 
 #[derive(Insertable)]
+#[table_name="user_invite_locks"]
+pub struct NewUserInviteLock<'a> {
+  pub user_invite_id: &'a i32,
+}
+
+#[derive(Insertable)]
 #[table_name="votes"]
 pub struct NewVote<'a> {
   pub proposal_id: &'a i32,
