@@ -13,7 +13,6 @@ mod sql_enum_types;
 mod static_responses;
 use models::*;
 use diesel::dsl::{sum};
-use bigdecimal::{BigDecimal};
 use static_responses::*;
 use actix_web::error::{ErrorInternalServerError};
 use actix_cors::Cors;
@@ -135,10 +134,11 @@ fn create_proposal_route(
 fn assign_vote_points_route(
   data: web::Data<middleware::AppData>,
   req: HttpRequest,
-  payload: CreateVotePayload,
-  proposal_id: actix_web::web::Path<i32>,
+  payload: Json<CreateVotePayload>,
+  proposal_id_param: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
   use schema::{user_invites, proposals, user_invite_locks, polls, votes};
+  let proposal_id = proposal_id_param.into_inner();
 
   let connection = data
     .pg_pool
@@ -151,7 +151,7 @@ fn assign_vote_points_route(
   connection.transaction::<_, diesel::result::Error, _>(|| {
     let user_invite_id = user_invites::table
       .inner_join(polls::table.inner_join(proposals::table))
-      .filter(proposals::dsl::id.eq(&proposal_id.into_inner())
+      .filter(proposals::dsl::id.eq(&proposal_id)
         .and(user_invites::dsl::email.eq(&user_info.email)))
       .select(user_invites::id)
       .first::<i32>(&*connection)?;
@@ -197,7 +197,7 @@ fn assign_vote_points_route(
 }
 
 fn get_my_votes(
-  data: web::Data<middleware::AppData>,
+  _data: web::Data<middleware::AppData>,
   _poll_id: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
   Ok(

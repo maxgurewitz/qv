@@ -71,7 +71,7 @@ fn create_poll_integration() {
     assert_eq!(invite_user_response.status(), 200);
 
     // TODO try to vote without starting poll check 403
-    // TODO try starting already started poll check 404
+    // TODO try starting already started poll check 400
     let start_poll_response: reqwest::Response = test_resources
       .http_client
       .put(&format!("{}{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id, "/start-poll"))
@@ -95,8 +95,8 @@ fn create_poll_integration() {
       .unwrap();
 
     assert_eq!(vote_response.status(), 200);
-    // debug user 2 votes
-    // TODO try voting with more than available points
+    // TODO try voting with more than available points check 403
+
     // admin user 1 finishes poll
     // get poll, which should optionally include vote totals when poll is finished.
 }
