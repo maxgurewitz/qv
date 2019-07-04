@@ -70,6 +70,14 @@ pub struct NewUserInvite<'a> {
   pub poll_id: &'a i32,
 }
 
+#[derive(Insertable)]
+#[table_name="votes"]
+pub struct NewVote<'a> {
+  pub proposal_id: &'a i32,
+  pub user_invite_id: &'a i32,
+  pub points: &'a f64,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InviteUserPayload {
   pub email: String

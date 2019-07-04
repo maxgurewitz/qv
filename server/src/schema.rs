@@ -44,16 +44,6 @@ table! {
 }
 
 table! {
-    users (email) {
-        email -> Varchar,
-        email_verified -> Nullable<Bool>,
-        name -> Nullable<Varchar>,
-        locale -> Nullable<Varchar>,
-        picture -> Nullable<Varchar>,
-    }
-}
-
-table! {
     votes (id) {
         id -> Int4,
         user_invite_id -> Int4,
@@ -75,6 +65,5 @@ allow_tables_to_appear_in_same_query!(
     proposals,
     user_invite_locks,
     user_invites,
-    users,
     votes,
 );

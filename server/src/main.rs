@@ -135,6 +135,7 @@ fn create_proposal_route(
 fn assign_vote_points_route(
   data: web::Data<middleware::AppData>,
   req: HttpRequest,
+  payload: CreateVotePayload,
   proposal_id: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
   use schema::{user_invites, proposals, user_invite_locks, polls, votes};
@@ -155,7 +156,8 @@ fn assign_vote_points_route(
       .select(user_invites::id)
       .first::<i32>(&*connection)?;
 
-    let _lock = user_invite_locks::table
+    // lock in order to prevent race conditions resulting in the user being able to spend more than their allotted points
+    user_invite_locks::table
       .find(&user_invite_id)
       .for_update()
       .execute(&*connection)?;
@@ -166,15 +168,26 @@ fn assign_vote_points_route(
       .first::<Option<f64>>(&*connection)?
       .unwrap_or(0.0);
 
-    // select user invite lock with for update lock
-    // select sum of votes, if exceeding 100 exit
-    // upsert vote for proposal with new vote value
-    // let user_invite_lock = user_invite_locks.filter(user_invite_locks::dsl::)
+    if vote_sum < 100.0 {
+      let new_vote = NewVote {
+        proposal_id: &proposal_id,
+        user_invite_id: &user_invite_id,
+        points: &payload.points,
+      };
+
+      // if within points budget upsert points
+      diesel::insert_into(votes::table)
+        .values(&new_vote)
+        .on_conflict((votes::dsl::proposal_id, votes::dsl::user_invite_id))
+        .do_update()
+        .set(votes::dsl::points.eq(&payload.points))
+        .execute(&*connection)?;
+    }
+    // TODO handle failure due to lack of points and respond with 400
+
     Ok(())
-  });
-  // begin transaction
-  // select and lock rows by email and proposal ids
-  // 
+  })
+  .map_err(map_to_intern_service_err)?;
 
   Ok(
     HttpResponse::Ok()
