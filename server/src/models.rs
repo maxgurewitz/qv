@@ -108,3 +108,8 @@ pub struct CreateVotePayload {
 pub struct CreateProposalResource {
   pub proposal: Proposal,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GenericJsonResponse {
+  pub message: String
+}

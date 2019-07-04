@@ -15,7 +15,6 @@ fn create_poll_integration() {
       .json()
       .unwrap();
 
-
     assert_eq!(user_info_resource.user.email_verified, Option::Some(true));
     
     let create_poll_payload = qv::models::CreatePollPayload {
@@ -89,7 +88,7 @@ fn create_poll_integration() {
     let vote_response: reqwest::Response = test_resources
       .http_client
       .put(&format!("{}{}{}{}", test_resources.base_url, "/private/proposal/", create_proposal_resource.proposal.id, "/vote"))
-      .header("Authorization", utils::DEBUG_TOKEN_1)
+      .header("Authorization", utils::DEBUG_TOKEN_2)
       .json(&create_vote_payload)
       .send()
       .unwrap();

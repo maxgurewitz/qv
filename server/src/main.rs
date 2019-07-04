@@ -20,6 +20,7 @@ use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web::web::{Json};
 use std::env;
 use std::sync::Arc;
+use std::fmt::{Display};
 use diesel::prelude::*;
 
 fn get_user_from_req(req: HttpRequest) -> Result<Arc<Auth0Profile>, Error> {
@@ -31,7 +32,8 @@ fn get_user_from_req(req: HttpRequest) -> Result<Arc<Auth0Profile>, Error> {
     .ok_or_else(|| ErrorInternalServerError(NOT_FOUND_MSG))
 }
 
-fn map_to_intern_service_err<T>(_: T) -> Error {
+fn map_to_internal_service_err<T: Display>(e: T) -> Error {
+  println!("Programmatic error: {}", e);
   ErrorInternalServerError(INTERNAL_SERVICE_ERROR_MSG)
 }
 
@@ -60,10 +62,9 @@ fn create_poll_route(
   let connection = data
     .pg_pool
     .get()
-    .map_err(map_to_intern_service_err)?;
+    .map_err(map_to_internal_service_err)?;
   
-  let user_info = get_user_from_req(req)
-    .map_err(map_to_intern_service_err)?;
+  let user_info = get_user_from_req(req)?;
 
   let new_poll = NewPoll {
     email: &user_info.email,
@@ -71,10 +72,11 @@ fn create_poll_route(
     poll_type: &payload.poll_type,
   };
 
+  // FIXME create lock in transation
   let poll = diesel::insert_into(polls::table)
     .values(&new_poll)
     .get_result::<Poll>(&*connection)
-    .map_err(map_to_intern_service_err)?;
+    .map_err(map_to_internal_service_err)?;
 
   Ok(web::Json(CreatePollResource { poll }))
 }
@@ -115,7 +117,7 @@ fn create_proposal_route(
   let connection = data
     .pg_pool
     .get()
-    .map_err(map_to_intern_service_err)?;
+    .map_err(map_to_internal_service_err)?;
 
   let new_proposal = NewProposal {
     summary: &payload.summary,
@@ -126,7 +128,7 @@ fn create_proposal_route(
   let proposal = diesel::insert_into(proposals::table)
     .values(&new_proposal)
     .get_result::<Proposal>(&*connection)
-    .map_err(map_to_intern_service_err)?;
+    .map_err(map_to_internal_service_err)?;
 
   Ok(Json(CreateProposalResource { proposal }))
 }
@@ -143,10 +145,9 @@ fn assign_vote_points_route(
   let connection = data
     .pg_pool
     .get()
-    .map_err(map_to_intern_service_err)?;
+    .map_err(map_to_internal_service_err)?;
 
-  let user_info = get_user_from_req(req)
-    .map_err(map_to_intern_service_err)?;
+  let user_info = get_user_from_req(req)?;
 
   connection.transaction::<_, diesel::result::Error, _>(|| {
     let user_invite_id = user_invites::table
@@ -187,7 +188,15 @@ fn assign_vote_points_route(
 
     Ok(())
   })
-  .map_err(map_to_intern_service_err)?;
+  .map_err(|e| {
+    match e {
+      diesel::result::Error::NotFound => 
+        HttpResponse::Forbidden()
+          .content_type("application/json")
+          .json(GenericJsonResponse { message: "User lacks access to the relevant poll.".to_string() }),
+      _ => HttpResponse::from_error(map_to_internal_service_err(e))
+    }
+  })?;
 
   Ok(
     HttpResponse::Ok()
@@ -217,7 +226,7 @@ fn start_poll(
   let connection = data
     .pg_pool
     .get()
-    .map_err(map_to_intern_service_err)?;
+    .map_err(map_to_internal_service_err)?;
 
   let inner_poll_id = poll_id.into_inner();
   let target = id.eq(inner_poll_id).and(current_progress.eq(sql_enum_types::ProgressEnum::NotStarted));
@@ -227,7 +236,7 @@ fn start_poll(
     .set(polls::current_progress.eq(sql_enum_types::ProgressEnum::InProgress))
     .execute(&*connection)
     // TODO handle 404's
-    .map_err(map_to_intern_service_err)?; 
+    .map_err(map_to_internal_service_err)?; 
 
   Ok(
     HttpResponse::Ok()
@@ -271,7 +280,7 @@ fn invite_user(
   let connection = data
     .pg_pool
     .get()
-    .map_err(map_to_intern_service_err)?;
+    .map_err(map_to_internal_service_err)?;
 
   let new_user_invite = NewUserInvite {
     email: &payload.email,
@@ -281,7 +290,7 @@ fn invite_user(
   diesel::insert_into(user_invites::table)
     .values(&new_user_invite)
     .execute(&*connection)
-    .map_err(map_to_intern_service_err)?;
+    .map_err(map_to_internal_service_err)?;
 
   Ok(
     HttpResponse::Ok()
