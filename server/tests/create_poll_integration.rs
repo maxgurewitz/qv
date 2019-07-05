@@ -73,7 +73,7 @@ fn create_poll_integration() {
     // TODO try starting already started poll check 400
     let start_poll_response: reqwest::Response = test_resources
       .http_client
-      .put(&format!("{}{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id, "/start-poll"))
+      .put(&format!("{}{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id, "/start"))
       .header("Authorization", utils::DEBUG_TOKEN_1)
       .json(&invite_user_payload)
       .send()
@@ -94,8 +94,17 @@ fn create_poll_integration() {
       .unwrap();
 
     assert_eq!(vote_response.status(), 200);
-    // TODO try voting with more than available points check 403
 
-    // admin user 1 finishes poll
-    // get poll, which should optionally include vote totals when poll is finished.
+    let finish_response: reqwest::Response = test_resources
+      .http_client
+      .put(&format!("{}{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id, "/finish"))
+      .header("Authorization", utils::DEBUG_TOKEN_1)
+      .send()
+      .unwrap();
+
+    assert_eq!(finish_response.status(), 200);
+    // TODO try voting with more than available points check 403
+    // TODO get poll, check that poll summary is absent, that has correct status
+    // TODO admin user 1 finishes poll
+    // TODO get poll, should now include vote totals because the poll has been finished
 }

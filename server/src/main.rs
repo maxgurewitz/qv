@@ -85,6 +85,7 @@ fn get_poll_route(
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
   let _poll_id = &req.match_info()["poll_id"];
+  // FIXME check that user owns or was invited to poll
 
   Ok(
     HttpResponse::Ok()
@@ -98,6 +99,7 @@ fn update_proposal_route(
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
   let _poll_id = &req.match_info()["proposal_id"];
+  // FIXME check that user is owner
 
   Ok(
     HttpResponse::Ok()
@@ -112,6 +114,8 @@ fn create_proposal_route(
   poll_id: actix_web::web::Path<i32>,
 ) -> Result<Json<CreateProposalResource>, Error> {
   use schema::proposals;
+  // FIXME check that user owns poll
+  // FIXME check that poll is unstarted
 
   let connection = data
     .pg_pool
@@ -149,12 +153,12 @@ fn assign_vote_points_route(
   let user_info = get_user_from_req(req)?;
 
   connection.transaction::<_, diesel::result::Error, _>(|| {
-    let user_invite_id = user_invites::table
+    let (user_invite_id, poll_progress) = user_invites::table
       .inner_join(polls::table.inner_join(proposals::table))
       .filter(proposals::dsl::id.eq(&proposal_id)
         .and(user_invites::dsl::email.eq(&user_info.email)))
-      .select(user_invites::id)
-      .first::<i32>(&*connection)?;
+      .select((user_invites::id, polls::current_progress))
+      .first::<(i32, sql_enum_types::ProgressEnum)>(&*connection)?;
 
     // lock in order to prevent race conditions resulting in the user being able to spend more than their allotted points
     user_invite_locks::table
@@ -176,7 +180,7 @@ fn assign_vote_points_route(
 
     let within_budget = (vote_sum - vote_to_overwrite_option.map(|v| v.points).unwrap_or(0.0) + payload.points) < 100.0;
 
-    if within_budget {
+    if poll_progress == sql_enum_types::ProgressEnum::InProgress &&within_budget {
       vote_to_overwrite_option.map(|vote_to_overwrite| 
         diesel::update(votes::dsl::votes.find(&vote_to_overwrite.id))
           .set(votes::dsl::points.eq(&payload.points))
@@ -193,7 +197,7 @@ fn assign_vote_points_route(
           .execute(&*connection)
       })?;
     }
-    // TODO handle failure due to lack of points and respond with 400
+    // TODO handle failure due to lack of points or not in progress and respond with 400
 
     Ok(())
   })
@@ -233,6 +237,7 @@ fn start_poll(
 ) -> Result<HttpResponse, Error> {
   use schema::polls;
   use schema::polls::dsl::*;
+  // FIXME check that user owns poll
 
   let connection = data
     .pg_pool
@@ -257,10 +262,28 @@ fn start_poll(
 }
 
 fn finish_poll(
-  _data: web::Data<middleware::AppData>,
-  req: HttpRequest,
+  data: web::Data<middleware::AppData>,
+  poll_id_param: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
-  let _poll_id = &req.match_info()["poll_id"];
+  use schema::polls;
+  use schema::polls::dsl::*;
+  // FIXME check that user owns poll
+
+  let connection = data
+    .pg_pool
+    .get()
+    .map_err(map_to_internal_service_err)?;
+
+  let poll_id = poll_id_param.into_inner();
+
+  let target = id.eq(poll_id).and(current_progress.eq(sql_enum_types::ProgressEnum::NotStarted));
+
+  diesel::update(polls)
+    .filter(target)
+    .set(polls::current_progress.eq(sql_enum_types::ProgressEnum::Finished))
+    .execute(&*connection)
+    // TODO handle 404's
+    .map_err(map_to_internal_service_err)?; 
 
   Ok(
     HttpResponse::Ok()
@@ -293,6 +316,7 @@ fn invite_user(
     .get()
     .map_err(map_to_internal_service_err)?;
 
+  // FIXME check that user owns poll
   connection.transaction::<_, diesel::result::Error, _>(|| {
     let new_user_invite = NewUserInvite {
       email: &payload.email,
@@ -358,6 +382,7 @@ fn main() {
               .route("/user-info", web::get().to(user_info_route))
               .route("/user-search", web::get().to(user_search))
               .service(
+                // FIXME pluralize
                 web::scope("/poll")
                   .route("", web::post().to(create_poll_route))
                   .service(
@@ -365,12 +390,13 @@ fn main() {
                       .route("", web::get().to(get_poll_route))
                       .route("/my-votes", web::get().to(get_my_votes))
                       .route("/invite-user", web::post().to(invite_user))
-                      .route("/start-poll", web::put().to(start_poll))
-                      .route("/finish-poll", web::put().to(finish_poll))
+                      .route("/start", web::put().to(start_poll))
+                      .route("/finish", web::put().to(finish_poll))
                       .route("/proposal", web::post().to(create_proposal_route))
                   )
               )
               .service(
+                // FIXME pluralize
                 web::scope("/proposal/{proposal_id}")
                   .route("", web::put().to(update_proposal_route))
                   .route("/vote", web::put().to(assign_vote_points_route))
