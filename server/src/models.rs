@@ -41,6 +41,16 @@ pub struct UserInvite {
   pub created_at: DateTime<Utc>,
 }
 
+#[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, Copy, Clone)]
+pub struct Vote {
+  pub id: i32,
+  pub user_invite_id: i32,
+  pub proposal_id: i32,
+  pub points: f64,
+  pub created_at: DateTime<Utc>,
+  pub updated_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreatePollPayload {
   pub title: String,

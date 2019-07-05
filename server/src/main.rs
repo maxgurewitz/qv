@@ -168,20 +168,30 @@ fn assign_vote_points_route(
       .first::<Option<f64>>(&*connection)?
       .unwrap_or(0.0);
 
-    if vote_sum < 100.0 {
-      let new_vote = NewVote {
-        proposal_id: &proposal_id,
-        user_invite_id: &user_invite_id,
-        points: &payload.points,
-      };
+    let vote_to_overwrite_option = votes::table
+      .filter(votes::dsl::user_invite_id.eq(&user_invite_id)
+        .and(votes::dsl::proposal_id.eq(&proposal_id)))
+      .first::<Vote>(&*connection)
+      .optional()?;
 
-      // if within points budget upsert points
-      diesel::insert_into(votes::table)
-        .values(&new_vote)
-        .on_conflict((votes::dsl::proposal_id, votes::dsl::user_invite_id))
-        .do_update()
-        .set(votes::dsl::points.eq(&payload.points))
-        .execute(&*connection)?;
+    let within_budget = (vote_sum - vote_to_overwrite_option.map(|v| v.points).unwrap_or(0.0) + payload.points) < 100.0;
+
+    if within_budget {
+      vote_to_overwrite_option.map(|vote_to_overwrite| 
+        diesel::update(votes::dsl::votes.find(&vote_to_overwrite.id))
+          .set(votes::dsl::points.eq(&payload.points))
+          .execute(&*connection)
+      ).unwrap_or_else(|| {
+        let new_vote = NewVote {
+          proposal_id: &proposal_id,
+          user_invite_id: &user_invite_id,
+          points: &payload.points,
+        };
+
+        diesel::insert_into(votes::table)
+          .values(&new_vote)
+          .execute(&*connection)
+      })?;
     }
     // TODO handle failure due to lack of points and respond with 400
 
@@ -192,7 +202,9 @@ fn assign_vote_points_route(
       diesel::result::Error::NotFound => 
         HttpResponse::Forbidden()
           .content_type("application/json")
-          .json(GenericJsonResponse { message: "User lacks access to the relevant poll.".to_string() }),
+          .json(GenericJsonResponse { 
+            message: "User lacks access to the relevant poll.".to_string() 
+          }),
       _ => HttpResponse::from_error(map_to_internal_service_err(e))
     }
   })?;
