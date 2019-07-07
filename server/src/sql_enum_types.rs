@@ -2,6 +2,7 @@ use diesel::deserialize::{self, FromSql};
 use diesel::pg::Pg;
 use diesel::serialize::{self, IsNull, Output, ToSql};
 use std::io::Write;
+use std::fmt;
 
 #[derive(SqlType)]
 #[postgres(type_name = "progress")]
@@ -13,6 +14,16 @@ pub enum ProgressEnum {
     NotStarted,
     InProgress,
     Finished
+}
+
+impl fmt::Display for ProgressEnum {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+      match self {
+        ProgressEnum::Finished => write!(f, "finished"),
+        ProgressEnum::InProgress => write!(f, "in_progress"),
+        ProgressEnum::NotStarted => write!(f, "not_started"),
+      }
+    }
 }
 
 // From example: https://github.com/ebkalderon/diesel/blob/db1a5156a7224ca978da806825efbfc3f349c558/diesel_tests/tests/custom_types.rs

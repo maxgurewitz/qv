@@ -22,6 +22,7 @@ use std::env;
 use std::sync::Arc;
 use std::fmt::{Display};
 use diesel::prelude::*;
+use std::collections::HashMap;
 
 fn get_user_from_req(req: HttpRequest) -> Result<Arc<Auth0Profile>, Error> {
   let extensions = req.extensions();
@@ -32,9 +33,11 @@ fn get_user_from_req(req: HttpRequest) -> Result<Arc<Auth0Profile>, Error> {
     .ok_or_else(|| ErrorInternalServerError(NOT_FOUND_MSG))
 }
 
-fn map_to_internal_service_err<T: Display>(e: T) -> Error {
+fn map_to_internal_service_err<T: Display>(e: T) -> HttpResponse {
   println!("Programmatic error: {}", e);
-  ErrorInternalServerError(INTERNAL_SERVICE_ERROR_MSG)
+
+  HttpResponse::InternalServerError()
+    .json(GenericJsonResponse { message: INTERNAL_SERVICE_ERROR_MSG.to_string() })
 }
 
 // routes
@@ -81,17 +84,77 @@ fn create_poll_route(
 }
 
 fn get_poll_route(
-  _data: web::Data<middleware::AppData>,
-  req: HttpRequest,
+  data: web::Data<middleware::AppData>,
+  poll_id_param: actix_web::web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
-  let _poll_id = &req.match_info()["poll_id"];
-  // FIXME check that user owns or was invited to poll
+  use schema::{polls, votes, proposals};
 
-  Ok(
-    HttpResponse::Ok()
-      .content_type("application/json")
-      .body(GENERIC_SUCCESS_MSG),
-  )
+  let connection = data
+    .pg_pool
+    .get()
+    .map_err(map_to_internal_service_err)?;
+
+  // FIXME check that user owns or was invited to poll
+  let poll_id = poll_id_param.into_inner();
+
+  let poll = polls::table
+      .find(&poll_id)
+      .first::<Poll>(&*connection)
+      .optional()
+      .map_err(map_to_internal_service_err)?
+      .ok_or_else(|| 
+        HttpResponse::NotFound()
+          .json(GenericJsonResponse { 
+            message: "Poll not found.".to_string() 
+          })
+      )?;
+
+  let point_totals = if poll.current_progress == sql_enum_types::ProgressEnum::Finished {
+    let vote_points = votes::table
+        .inner_join(proposals::table.inner_join(polls::table))
+        .filter(polls::dsl::id.eq(&poll_id))
+        .select((votes::dsl::points, votes::dsl::proposal_id))
+        .load::<(f64, i32)>(&*connection)
+        .map_err(map_to_internal_service_err)?;
+
+    let mut totals: HashMap<i32, f64> = HashMap::new();
+    for vote in &vote_points {
+      // Take the square root of point totals as outlined by QV.
+      let points = if vote.0.is_sign_negative() {
+        - vote.0.abs().sqrt()
+      } else {
+        vote.0.sqrt()
+      };
+      let proposal_id = vote.1;
+
+      let sum_for_proposal = totals
+        .entry(proposal_id)
+        .or_insert(0.0);
+
+      *sum_for_proposal += points;
+    }
+    Option::Some(totals)
+  } else {
+    Option::None
+  };
+
+  let assigned_proposals = if poll.current_progress != sql_enum_types::ProgressEnum::NotStarted {
+    proposals::table
+      .filter(proposals::dsl::poll_id.eq(&poll_id))
+      .load::<Proposal>(&*connection)
+      .map(Option::Some)
+      .map_err(map_to_internal_service_err)?
+  } else {
+    Option::None
+  };
+
+  let resource = GetPollResource {
+    point_totals,
+    proposals: assigned_proposals,
+    poll
+  };
+
+  Ok(HttpResponse::Ok().json(resource))
 }
 
 fn update_proposal_route(
@@ -205,11 +268,10 @@ fn assign_vote_points_route(
     match e {
       diesel::result::Error::NotFound => 
         HttpResponse::Forbidden()
-          .content_type("application/json")
           .json(GenericJsonResponse { 
             message: "User lacks access to the relevant poll.".to_string() 
           }),
-      _ => HttpResponse::from_error(map_to_internal_service_err(e))
+      _ => map_to_internal_service_err(e)
     }
   })?;
 
@@ -276,7 +338,7 @@ fn finish_poll(
 
   let poll_id = poll_id_param.into_inner();
 
-  let target = id.eq(poll_id).and(current_progress.eq(sql_enum_types::ProgressEnum::NotStarted));
+  let target = id.eq(poll_id).and(current_progress.eq(sql_enum_types::ProgressEnum::InProgress));
 
   diesel::update(polls)
     .filter(target)

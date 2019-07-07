@@ -2,6 +2,7 @@ use super::schema::*;
 use chrono::prelude::*;
 use std::sync::Arc;
 use super::sql_enum_types::*;
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Auth0Profile {
@@ -106,6 +107,13 @@ pub struct UserInfoResource {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreatePollResource {
+  pub poll: Poll,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GetPollResource {
+  pub point_totals: Option<HashMap<i32, f64>>,
+  pub proposals: Option<Vec<Proposal>>,
   pub poll: Poll,
 }
 

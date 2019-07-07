@@ -103,6 +103,25 @@ fn create_poll_integration() {
       .unwrap();
 
     assert_eq!(finish_response.status(), 200);
+
+    let mut finished_get_poll_response: reqwest::Response = test_resources
+      .http_client
+      .get(&format!("{}{}{}", test_resources.base_url, "/private/poll/", create_poll_resource.poll.id))
+      .header("Authorization", utils::DEBUG_TOKEN_1)
+      .send()
+      .unwrap();
+
+    assert_eq!(finished_get_poll_response.status(), 200);
+
+    let finished_get_poll_resource: qv::models::GetPollResource = finished_get_poll_response.json().unwrap();
+
+    assert_eq!(finished_get_poll_resource.point_totals.is_some(), true);
+    assert_eq!(finished_get_poll_resource.point_totals.unwrap().get(&create_proposal_resource.proposal.id).unwrap(), &3.0);
+
+    assert_eq!(finished_get_poll_resource.proposals.is_some(), true);
+    assert_eq!(finished_get_poll_resource.proposals.unwrap().len(), 1);
+
+
     // TODO try voting with more than available points check 403
     // TODO get poll, check that poll summary is absent, that has correct status
     // TODO admin user 1 finishes poll
