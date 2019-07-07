@@ -444,8 +444,7 @@ fn main() {
               .route("/user-info", web::get().to(user_info_route))
               .route("/user-search", web::get().to(user_search))
               .service(
-                // FIXME pluralize
-                web::scope("/poll")
+                web::scope("/polls")
                   .route("", web::post().to(create_poll_route))
                   .service(
                     web::scope("/{poll_id}")
@@ -454,12 +453,11 @@ fn main() {
                       .route("/invite-user", web::post().to(invite_user))
                       .route("/start", web::put().to(start_poll))
                       .route("/finish", web::put().to(finish_poll))
-                      .route("/proposal", web::post().to(create_proposal_route))
+                      .route("/proposals", web::post().to(create_proposal_route))
                   )
               )
               .service(
-                // FIXME pluralize
-                web::scope("/proposal/{proposal_id}")
+                web::scope("/proposals/{proposal_id}")
                   .route("", web::put().to(update_proposal_route))
                   .route("/vote", web::put().to(assign_vote_points_route))
               )
