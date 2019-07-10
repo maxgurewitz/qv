@@ -366,6 +366,42 @@ fn user_search(
   )
 }
 
+fn home_route(
+  data: web::Data<middleware::AppData>,
+  req: HttpRequest,
+) -> Result<HttpResponse, Error> {
+  use schema::{polls, user_invites};
+
+  let connection = data
+    .pg_pool
+    .get()
+    .map_err(map_to_internal_service_err)?;
+
+  let user = get_user_from_req(req)?;
+
+  let admin_polls = polls::table
+    .filter(polls::dsl::email.eq(&user.email))
+    .load::<Poll>(&*connection)
+    .map_err(map_to_internal_service_err)?;
+  
+  let invite_polls = polls::table
+    .inner_join(user_invites::table)
+    .filter(user_invites::dsl::email.eq(&user.email))
+    .select(polls::all_columns)
+    .load::<Poll>(&*connection)
+    .map_err(map_to_internal_service_err)?;
+
+  let resource = HomeResource {
+    invite_polls,
+    admin_polls
+  };
+
+  Ok(
+    HttpResponse::Ok()
+      .json(resource)
+  )
+}
+
 fn invite_user(
   data: web::Data<middleware::AppData>,
   payload: Json<InviteUserPayload>,
@@ -443,6 +479,7 @@ fn main() {
               .wrap(middleware::Auth)
               .route("/user-info", web::get().to(user_info_route))
               .route("/user-search", web::get().to(user_search))
+              .route("/home", web::get().to(home_route))
               .service(
                 web::scope("/polls")
                   .route("", web::post().to(create_poll_route))

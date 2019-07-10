@@ -20,7 +20,7 @@ const Home: React.FC<HomeProps> = (props) => {
       <div className="Home">
         <Button onClick={props.login} variant="contained" color="primary" >
           Login
-                </Button>
+        </Button>
       </div>
     </Grid>
   );

@@ -137,3 +137,9 @@ pub struct CreateProposalResource {
 pub struct GenericJsonResponse {
   pub message: String
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct HomeResource {
+  pub admin_polls: Vec<Poll>,
+  pub invite_polls: Vec<Poll>
+}

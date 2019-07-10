@@ -68,6 +68,20 @@ fn create_poll_integration() {
 
     assert_eq!(invite_user_response.status(), 200);
 
+    let invite_self_payload = qv::models::InviteUserPayload {
+      email: "fake_1@email.com".to_string()
+    };
+
+    let invite_self_response: reqwest::Response = test_resources
+      .http_client
+      .post(&format!("{}{}{}{}", test_resources.base_url, "/private/polls/", create_poll_resource.poll.id, "/invite-user"))
+      .header("Authorization", utils::DEBUG_TOKEN_1)
+      .json(&invite_self_payload)
+      .send()
+      .unwrap();
+
+    assert_eq!(invite_self_response.status(), 200);
+
     // TODO try to vote without starting poll check 403
     // TODO try starting already started poll check 400
     let start_poll_response: reqwest::Response = test_resources
@@ -80,19 +94,33 @@ fn create_poll_integration() {
 
     assert_eq!(start_poll_response.status(), 200);
 
-    let create_vote_payload = qv::models::CreateVotePayload {
+    let create_vote_payload1 = qv::models::CreateVotePayload {
       points: 9.0
     };
 
-    let vote_response: reqwest::Response = test_resources
+    let vote_response1: reqwest::Response = test_resources
       .http_client
       .put(&format!("{}{}{}{}", test_resources.base_url, "/private/proposals/", create_proposal_resource.proposal.id, "/vote"))
       .header("Authorization", utils::DEBUG_TOKEN_2)
-      .json(&create_vote_payload)
+      .json(&create_vote_payload1)
       .send()
       .unwrap();
 
-    assert_eq!(vote_response.status(), 200);
+    assert_eq!(vote_response1.status(), 200);
+
+    let create_vote_payload2 = qv::models::CreateVotePayload {
+      points: -4.0
+    };
+
+    let vote_response2: reqwest::Response = test_resources
+      .http_client
+      .put(&format!("{}{}{}{}", test_resources.base_url, "/private/proposals/", create_proposal_resource.proposal.id, "/vote"))
+      .header("Authorization", utils::DEBUG_TOKEN_1)
+      .json(&create_vote_payload2)
+      .send()
+      .unwrap();
+
+    assert_eq!(vote_response2.status(), 200);
 
     let finish_response: reqwest::Response = test_resources
       .http_client
@@ -115,13 +143,8 @@ fn create_poll_integration() {
     let finished_get_poll_resource: qv::models::GetPollResource = finished_get_poll_response.json().unwrap();
 
     assert_eq!(finished_get_poll_resource.point_totals.is_some(), true);
-    assert_eq!(finished_get_poll_resource.point_totals.unwrap().get(&create_proposal_resource.proposal.id).unwrap(), &3.0);
+    assert_eq!(finished_get_poll_resource.point_totals.unwrap().get(&create_proposal_resource.proposal.id).unwrap(), &1.0);
 
     assert_eq!(finished_get_poll_resource.proposals.is_some(), true);
     assert_eq!(finished_get_poll_resource.proposals.unwrap().len(), 1);
-
-    // TODO try voting with more than available points check 403
-    // TODO get poll, check that poll summary is absent, that has correct status
-    // TODO admin user 1 finishes poll
-    // TODO get poll, should now include vote totals because the poll has been finished
 }
