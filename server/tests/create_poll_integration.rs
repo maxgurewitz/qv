@@ -122,6 +122,21 @@ fn create_poll_integration() {
 
     assert_eq!(vote_response2.status(), 200);
 
+    let mut home_response: reqwest::Response = test_resources
+      .http_client
+      .get(&format!("{}{}", test_resources.base_url, "/private/home"))
+      .header("Authorization", utils::DEBUG_TOKEN_1)
+      .send()
+      .unwrap();
+
+    assert_eq!(home_response.status(), 200);
+
+    let home_resource: qv::models::HomeResource = home_response.json().unwrap();
+
+    assert!(home_resource.admin_polls.len() >= 1);
+    assert!(home_resource.invite_polls.len() >= 1);
+    assert!(home_resource.admin_polls.iter().find(|p| p.id == create_poll_resource.poll.id).is_some());
+
     let finish_response: reqwest::Response = test_resources
       .http_client
       .put(&format!("{}{}{}{}", test_resources.base_url, "/private/polls/", create_poll_resource.poll.id, "/finish"))
