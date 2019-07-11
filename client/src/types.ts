@@ -12,9 +12,9 @@ enum ProgressEnum { NotStarted, InProgress, Finished }
 
 export interface Poll {
   id: number,
-  email: String,
-  title: String,
-  pollType: String,
+  email: string,
+  title: string,
+  pollType: string,
   currentProgress: ProgressEnum,
   createdAt: string,
   updatedAt: string,
@@ -24,10 +24,23 @@ export interface Polls {
   [pollId: string]: Poll | null
 }
 
+export interface Proposal {
+  summary: string,
+  fullDescriptionLink: string | null,
+  pollId: number,
+  createdAt: string,
+  updatedAt: string,
+}
+
+export interface Proposals {
+  [pollId: string]: Array<Proposal> | null
+}
+
 export interface State {
   accessToken: string | null,
   userInfo: UserInfo | null,
-  polls: Polls
+  polls: Polls,
+  proposals: Proposals
 }
 
 export namespace Actions {
