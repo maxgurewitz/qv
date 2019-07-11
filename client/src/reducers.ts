@@ -7,7 +7,8 @@ const initialState: State = {
   accessToken: window.localStorage.getItem("token") || null,
   userInfo: null,
   polls: {},
-  proposals: {}
+  proposals: {},
+  inviteIds: {},
 };
 
 function primaryReducer(state = initialState, action: Action): State {

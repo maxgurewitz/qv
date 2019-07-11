@@ -21,7 +21,7 @@ export interface Poll {
 }
 
 export interface Polls {
-  [pollId: string]: Poll | null
+  [pollId: number]: Poll | null
 }
 
 export interface Proposal {
@@ -33,14 +33,20 @@ export interface Proposal {
 }
 
 export interface Proposals {
-  [pollId: string]: Array<Proposal> | null
+  [pollId: number]: Array<Proposal> | null
+}
+
+export interface InviteIds {
+  // email to poll id
+  [email: string]: Array<number>
 }
 
 export interface State {
   accessToken: string | null,
   userInfo: UserInfo | null,
   polls: Polls,
-  proposals: Proposals
+  proposals: Proposals,
+  inviteIds: InviteIds
 }
 
 export namespace Actions {
