@@ -24,7 +24,7 @@ use std::fmt::{Display};
 use diesel::prelude::*;
 use std::collections::HashMap;
 
-fn get_user_from_req(req: HttpRequest) -> Result<Arc<Auth0Profile>, Error> {
+fn get_user_from_req(req: &HttpRequest) -> Result<Arc<Auth0Profile>, Error> {
   let extensions = req.extensions();
 
   extensions
@@ -42,7 +42,7 @@ fn map_to_internal_service_err<T: Display>(e: T) -> HttpResponse {
 
 // routes
 fn user_info_route(req: HttpRequest) -> Result<web::Json<UserInfoResource>, Error> {
-  let user = get_user_from_req(req)?;
+  let user = get_user_from_req(&req)?;
 
   Ok(web::Json(UserInfoResource { user: user }))
 }
@@ -67,7 +67,7 @@ fn create_poll_route(
     .get()
     .map_err(map_to_internal_service_err)?;
   
-  let user_info = get_user_from_req(req)?;
+  let user_info = get_user_from_req(&req)?;
 
   let new_poll = NewPoll {
     email: &user_info.email,
@@ -213,7 +213,7 @@ fn assign_vote_points_route(
     .get()
     .map_err(map_to_internal_service_err)?;
 
-  let user_info = get_user_from_req(req)?;
+  let user_info = get_user_from_req(&req)?;
 
   connection.transaction::<_, diesel::result::Error, _>(|| {
     let (user_invite_id, poll_progress) = user_invites::table
@@ -377,7 +377,7 @@ fn home_route(
     .get()
     .map_err(map_to_internal_service_err)?;
 
-  let user = get_user_from_req(req)?;
+  let user = get_user_from_req(&req)?;
 
   let admin_polls = polls::table
     .filter(polls::dsl::email.eq(&user.email))
