@@ -22,7 +22,7 @@ use std::env;
 use std::sync::Arc;
 use std::fmt::{Display};
 use diesel::prelude::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 fn get_user_from_req(req: &HttpRequest) -> Result<Arc<Auth0Profile>, Error> {
   let extensions = req.extensions();
@@ -391,9 +391,23 @@ fn home_route(
     .load::<Poll>(&*connection)
     .map_err(map_to_internal_service_err)?;
 
+  let mut poll_set: HashSet<Poll> = HashSet::new();
+  let mut admin_poll_ids: Vec<i32> = Vec::new();
+  let mut invite_poll_ids: Vec<i32> = Vec::new();
+
+  for poll in admin_polls {
+    admin_poll_ids.push(poll.id);
+    poll_set.insert(poll);
+  }
+  for poll in invite_polls {
+    invite_poll_ids.push(poll.id);
+    poll_set.insert(poll);
+  }
+
   let resource = HomeResource {
-    invite_polls,
-    admin_polls
+    polls: poll_set,
+    invite_poll_ids,
+    admin_poll_ids
   };
 
   Ok(

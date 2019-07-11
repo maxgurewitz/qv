@@ -8,7 +8,7 @@ use std::fmt;
 #[postgres(type_name = "progress")]
 pub struct Progress;
 
-#[derive(Debug, PartialEq, FromSqlRow, AsExpression, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, FromSqlRow, AsExpression, Serialize, Deserialize, Eq, Hash)]
 #[sql_type = "Progress"]
 pub enum ProgressEnum {
     NotStarted,

@@ -2,7 +2,7 @@ use super::schema::*;
 use chrono::prelude::*;
 use std::sync::Arc;
 use super::sql_enum_types::*;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Auth0Profile {
@@ -13,7 +13,7 @@ pub struct Auth0Profile {
   pub picture: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, AsChangeset)]
+#[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, AsChangeset, Eq, PartialEq, Hash)]
 pub struct Poll {
   pub id: i32,
   pub email: String,
@@ -138,8 +138,10 @@ pub struct GenericJsonResponse {
   pub message: String
 }
 
+// FIXME normalize, set polls field, and have subsets be just ids
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HomeResource {
-  pub admin_polls: Vec<Poll>,
-  pub invite_polls: Vec<Poll>
+  pub polls: HashSet<Poll>,
+  pub admin_poll_ids: Vec<i32>,
+  pub invite_poll_ids: Vec<i32>
 }
