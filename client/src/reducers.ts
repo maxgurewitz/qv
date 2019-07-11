@@ -5,7 +5,8 @@ import { State, Action } from './types';
 
 const initialState: State = {
   accessToken: window.localStorage.getItem("token") || null,
-  userInfo: null
+  userInfo: null,
+  polls: {}
 };
 
 function primaryReducer(state = initialState, action: Action): State {

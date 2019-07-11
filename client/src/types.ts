@@ -8,9 +8,26 @@ export interface UserInfo {
   picture: string | null,
 }
 
+enum ProgressEnum { NotStarted, InProgress, Finished }
+
+export interface Poll {
+  id: number,
+  email: String,
+  title: String,
+  pollType: String,
+  currentProgress: ProgressEnum,
+  createdAt: string,
+  updatedAt: string,
+}
+
+export interface Polls {
+  [pollId: string]: Poll | null
+}
+
 export interface State {
   accessToken: string | null,
-  userInfo: UserInfo | null
+  userInfo: UserInfo | null,
+  polls: Polls
 }
 
 export namespace Actions {
