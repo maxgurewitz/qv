@@ -392,16 +392,19 @@ fn home_route(
     .map_err(map_to_internal_service_err)?;
 
   let mut poll_set: HashSet<Poll> = HashSet::new();
+  let mut invite_poll_ids: Vec<i32> = Vec::new();
 
   for poll in admin_polls {
     poll_set.insert(poll);
   }
   for poll in invite_polls {
+    invite_poll_ids.push(poll.id);
     poll_set.insert(poll);
   }
 
   let resource = HomeResource {
     polls: poll_set,
+    invite_poll_ids
   };
 
   Ok(

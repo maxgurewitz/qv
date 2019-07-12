@@ -141,4 +141,5 @@ pub struct GenericJsonResponse {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HomeResource {
   pub polls: HashSet<Poll>,
+  pub invite_poll_ids: Vec<i32>
 }
