@@ -13,7 +13,7 @@ pub struct Auth0Profile {
   pub picture: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, AsChangeset, Eq, PartialEq, Hash)]
+#[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, AsChangeset, Eq, PartialEq, Hash, Clone)]
 pub struct Poll {
   pub id: i32,
   pub email: String,
@@ -138,10 +138,7 @@ pub struct GenericJsonResponse {
   pub message: String
 }
 
-// FIXME normalize, set polls field, and have subsets be just ids
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HomeResource {
   pub polls: HashSet<Poll>,
-  pub admin_poll_ids: Vec<i32>,
-  pub invite_poll_ids: Vec<i32>
 }

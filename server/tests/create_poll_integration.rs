@@ -133,9 +133,8 @@ fn create_poll_integration() {
 
     let home_resource: qv::models::HomeResource = home_response.json().unwrap();
 
-    assert!(home_resource.admin_poll_ids.len() >= 1);
-    assert!(home_resource.invite_poll_ids.len() >= 1);
-    assert!(home_resource.admin_poll_ids.iter().cloned().find(|id| id == &create_poll_resource.poll.id).is_some());
+    assert!(home_resource.polls.len() >= 2);
+    assert!(home_resource.polls.iter().cloned().find(|p| p.id == create_poll_resource.poll.id).is_some());
 
     let finish_response: reqwest::Response = test_resources
       .http_client

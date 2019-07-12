@@ -61,7 +61,13 @@ In order to run integration tests,
 docker-compose --file docker-compose-local-it.yml up
 ```
 
-This command spins up several docker images, one responsible for watching for changes to the application server, the other watching for changes to the tests.
+This command spins up several docker images, one responsible for watching for changes to the application server, the other watching for changes to the tests. Alternatively you can bring up the database, and server separately and run,
+
+```
+BASE_URL=http://localhost:8000/api RUST_BACKTRACE=1 cargo test integration
+```
+
+This has the advantage of running somewhat faster.
 
 ### Connecting to Postgres Shell
 
