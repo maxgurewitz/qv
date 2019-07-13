@@ -1,40 +1,62 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import { Action } from './types';
+import LoadingPage from './LoadingPage';
+import { connect, MapStateToPropsParam } from 'react-redux';
+import { Action, CombinedState, UserInfo, Polls, InviteIds } from './types';
 
-interface HomeProps {
-  login: () => void;
+interface HomeState {
+  initialized: boolean
 }
 
-const Home: React.FC<HomeProps> = (props) => {
-  return (
-    <Grid
-      container
-      direction="column"
-      justify="center"
-      alignItems="center"
-      className="centered-grid">
-      <div className="Home">
-        <Button onClick={props.login} variant="contained" color="primary" >
-          Login
-        </Button>
-      </div>
-    </Grid>
-  );
+class Home extends React.Component<HomeProps, HomeState> {
+  componentDidMount() {
+    this.props.initialize();
+  }
+
+  constructor(props: HomeProps) {
+    super(props);
+    this.state = {
+      initialized: false
+    };
+  }
+
+  render() {
+    return (
+      <>
+      </>
+    );
+  }
 }
 
-function mapDispatchToProps(dispatch: Dispatch<Action>): HomeProps {
+type HomeProps = HomeStateProps & HomeDispatchProps;
+
+interface HomeStateProps {
+  userInfo: UserInfo | null,
+  polls: Polls,
+  inviteIds: InviteIds
+}
+
+const mapStateToProps: MapStateToPropsParam<HomeStateProps, {}, CombinedState> = (state: CombinedState) => {
   return {
-    login: () => {
+    userInfo: state.primary.userInfo,
+    polls: state.primary.polls,
+    inviteIds: state.primary.inviteIds
+  };
+};
+
+interface HomeDispatchProps {
+  initialize: () => void
+}
+
+function mapDispatchToProps(dispatch: Dispatch<Action>) {
+  return {
+    initialize() {
       dispatch({
         source: 'internal',
-        type: 'Login'
-      })
+        type: 'RequestHomeResource',
+      });
     }
   };
 }
 
-export default connect(null, mapDispatchToProps)(Home);
+export default connect<HomeStateProps, HomeDispatchProps, {}, CombinedState>(mapStateToProps, mapDispatchToProps)(Home);

@@ -1,21 +1,26 @@
 import { RouterState } from 'connected-react-router';
 
+export interface HomeResource {
+  polls: Poll[],
+  inviteIds: number[]
+}
+
 export interface UserInfo {
   email: string,
-  email_verified: boolean | null,
+  emailVerified: boolean | null,
   name: string | null,
   locale: string | null,
   picture: string | null,
 }
 
-enum ProgressEnum { NotStarted, InProgress, Finished }
+export enum PollProgressEnum { NotStarted, InProgress, Finished }
 
 export interface Poll {
   id: number,
   email: string,
   title: string,
   pollType: string,
-  currentProgress: ProgressEnum,
+  currentProgress: PollProgressEnum,
   createdAt: string,
   updatedAt: string,
 }
@@ -49,39 +54,47 @@ export interface State {
   inviteIds: InviteIds
 }
 
-export namespace Actions {
-  interface BaseAction {
-    source: "internal"
-  }
+interface BaseAction {
+  source: "internal"
+}
 
-  export interface AuthCallback extends BaseAction {
-    type: "AuthCallback",
-    accessToken: string,
-    state: string
-  }
+export interface AuthCallbackAction extends BaseAction {
+  type: "AuthCallback",
+  accessToken: string,
+  state: string
+}
 
-  export interface Login extends BaseAction {
-    type: "Login"
-  }
+export interface RequestHomeResourceAction extends BaseAction {
+  type: "RequestHomeResource",
+}
 
-  export interface UserInfoAction extends BaseAction {
-    type: "UserInfo",
-    accessToken: string,
-    userInfo: UserInfo
-  }
+export interface HomeResourceResponseAction extends BaseAction {
+  type: "HomeResourceResponse",
+  polls: Polls,
+  inviteIds: InviteIds
+}
 
-  export interface Initialize extends BaseAction {
-    type: "Initialize",
-    accessToken: string | null
-  }
+export interface LoginAction extends BaseAction {
+  type: "Login"
+}
 
-  export interface LogOut extends BaseAction {
-    type: "LogOut"
-  }
+export interface UserInfoAction extends BaseAction {
+  type: "UserInfo",
+  accessToken: string,
+  userInfo: UserInfo
+}
 
-  export interface NoOp extends BaseAction {
-    type: "NoOp"
-  }
+export interface InitializeAction extends BaseAction {
+  type: "Initialize",
+  accessToken: string | null
+}
+
+export interface LogOutAction extends BaseAction {
+  type: "LogOut"
+}
+
+export interface NoOpAction extends BaseAction {
+  type: "NoOp"
 }
 
 export interface CombinedState {
@@ -89,4 +102,13 @@ export interface CombinedState {
   primary: State
 }
 
-export type Action = Actions.NoOp | Actions.Login | Actions.AuthCallback | Actions.LogOut | Actions.UserInfoAction | Actions.Initialize;
+export type Action = 
+  NoOpAction |
+  InitializeAction |
+  LoginAction |
+  RequestHomeResourceAction |
+  HomeResourceResponseAction |
+  LogOutAction | 
+  AuthCallbackAction | 
+  UserInfoAction
+  ;

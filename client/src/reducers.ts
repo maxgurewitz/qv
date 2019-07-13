@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux'
+import _ from 'lodash';
 import { connectRouter } from 'connected-react-router'
 import { History } from 'history';
 import { State, Action } from './types';
@@ -27,6 +28,15 @@ function primaryReducer(state = initialState, action: Action): State {
       state.userInfo = null;
       return state;
 
+    case "HomeResourceResponse": 
+      const inviteIds = _.mergeWith(state.inviteIds, action.inviteIds, (stateIds: number[], actionIds: number[]) =>   
+        _.uniq(stateIds.concat(actionIds))
+      );
+
+      return _.assign(state, {
+        polls: action.polls,
+        inviteIds
+      });
     case "Initialize":
       return state;
 
@@ -34,6 +44,9 @@ function primaryReducer(state = initialState, action: Action): State {
       return state;
 
     case "AuthCallback":
+      return state;
+
+    case "RequestHomeResource":
       return state;
 
     case "NoOp":

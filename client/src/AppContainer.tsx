@@ -5,7 +5,7 @@ import { Route, Switch, Redirect } from 'react-router';
 import { ConnectedRouter } from 'connected-react-router';
 import { history } from './configureStore';
 import './App.css';
-import Home from './HomeContainer';
+import Landing from './LandingContainer';
 import AuthCallback from './AuthCallbackContainer';
 import Initializing from './InitializingContainer';
 import LoggedIn from './LoggedInContainer';
@@ -22,7 +22,7 @@ const Initialized: React.FC<InitializedProps> = ({ loggedIn }) => {
       <Route exact path="/" render={() => (
         loggedIn ?
           <Redirect to="/app" /> :
-          <Home />
+          <Landing />
       )} />
       <Route path="/app" render={() => (
         loggedIn ?
