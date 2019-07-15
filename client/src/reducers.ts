@@ -10,6 +10,7 @@ const initialState: State = {
   polls: {},
   proposals: {},
   inviteIds: {},
+  requestsInFlight: new Set()
 };
 
 function primaryReducer(state = initialState, action: Action): State {
@@ -33,8 +34,10 @@ function primaryReducer(state = initialState, action: Action): State {
         _.uniq(stateIds.concat(actionIds))
       );
 
+      state.requestsInFlight.delete(action.uuid);
+
       return _.assign(state, {
-        polls: action.polls,
+        polls: _.assign(state.polls, action.polls),
         inviteIds
       });
     case "Initialize":
@@ -47,6 +50,7 @@ function primaryReducer(state = initialState, action: Action): State {
       return state;
 
     case "RequestHomeResource":
+      state.requestsInFlight.add(action.uuid);
       return state;
 
     case "NoOp":

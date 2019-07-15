@@ -73,6 +73,8 @@ fn create_poll_route(
     email: &user_info.email,
     title: &payload.title,
     poll_type: &payload.poll_type,
+    summary: &payload.summary,
+    full_description_link: payload.full_description_link.clone()
   };
 
   let poll = diesel::insert_into(polls::table)

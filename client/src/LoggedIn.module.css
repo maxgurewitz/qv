@@ -1,3 +1,7 @@
 .grow {
   flex-grow: 1;
 }
+
+.loggedIn {
+  height: 100%;
+}

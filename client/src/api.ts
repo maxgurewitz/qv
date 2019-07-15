@@ -12,7 +12,7 @@ export async function getHomeResource(token: string): Promise<HomeResource> {
     }
   });
   const polls: Poll[] = response.data.polls.map((p: any) => {
-    const {id, email, title, createdAt, updatedAt} = p;
+    const {id, email, title, summary, full_description_link, createdAt, updatedAt } = p;
     let progress = null;
     if (p.progress === 'in_progress') {
       progress = PollProgressEnum.InProgress;
@@ -21,7 +21,16 @@ export async function getHomeResource(token: string): Promise<HomeResource> {
     } else {
       progress = PollProgressEnum.NotStarted;
     }
-    return { id, email, title, progress, createdAt, updatedAt };
+    return { 
+      id, 
+      email,
+      title, 
+      progress, 
+      summary, 
+      fullDescriptionLink: full_description_link,
+      createdAt, 
+      updatedAt 
+    };
   });
   const {inviteIds} = response.data;
 

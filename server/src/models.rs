@@ -18,6 +18,8 @@ pub struct Poll {
   pub id: i32,
   pub email: String,
   pub title: String,
+  pub summary: String,
+  pub full_description_link: Option<String>,
   pub poll_type: String,
   pub current_progress: ProgressEnum,
   pub created_at: DateTime<Utc>,
@@ -56,6 +58,8 @@ pub struct Vote {
 pub struct CreatePollPayload {
   pub title: String,
   pub poll_type: String,
+  pub summary: String,
+  pub full_description_link: Option<String>,
 }
 
 #[derive(Insertable)]
@@ -63,6 +67,8 @@ pub struct CreatePollPayload {
 pub struct NewPoll<'a> {
   pub email: &'a str,
   pub title: &'a str,
+  pub summary: &'a str,
+  pub full_description_link: Option<String>,
   pub poll_type: &'a str,
 }
 

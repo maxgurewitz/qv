@@ -8,6 +8,8 @@ table! {
         id -> Int4,
         email -> Varchar,
         title -> Varchar,
+        summary -> Text,
+        full_description_link -> Nullable<Varchar>,
         poll_type -> Varchar,
         current_progress -> Progress,
         created_at -> Timestamptz,

@@ -72,6 +72,7 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
     try {
       homeResource = yield getHomeResource(state.accessToken);
     } catch (e) {
+      // FIXME need to finish request in case request fails
       console.error("Unable to retrieve user info", e);
     }
 
@@ -83,6 +84,7 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
 
       const homeResourceResponse: HomeResourceResponseAction = {
         source: 'internal',
+        uuid: action.uuid,
         type: 'HomeResourceResponse',
         inviteIds,
         polls

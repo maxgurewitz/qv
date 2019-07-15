@@ -8,10 +8,11 @@ import { Dispatch } from 'redux';
 import { connect, MapStateToPropsParam } from 'react-redux';
 import { Action, CombinedState } from './types';
 import styles from './LoggedIn.module.css';
+import Home from './HomeContainer';
 
 const LoggedIn: React.FC<LoggedInProps> = ({logOut}) => {
   return (
-    <div className={styles.grow}>
+    <div className={styles.loggedIn}>
       <AppBar position="static">
         <Toolbar>
           <Tabs value={0} onChange={console.log}>
@@ -25,7 +26,7 @@ const LoggedIn: React.FC<LoggedInProps> = ({logOut}) => {
           </Button>
         </Toolbar>
       </AppBar>
-      <div> Logged in </div>
+      <Home/>
     </div>
   );
 };

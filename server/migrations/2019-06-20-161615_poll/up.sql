@@ -6,6 +6,8 @@ CREATE TABLE polls (
   id SERIAL PRIMARY KEY,
   email VARCHAR NOT NULL,
   title VARCHAR NOT NULL,
+  summary TEXT NOT NULL,
+  full_description_link VARCHAR,
   poll_type VARCHAR NOT NULL,
   current_progress progress NOT NULL DEFAULT 'not_started',
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

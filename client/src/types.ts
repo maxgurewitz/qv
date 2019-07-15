@@ -20,6 +20,8 @@ export interface Poll {
   email: string,
   title: string,
   pollType: string,
+  summary: string,
+  fullDescriptionLink: string | null,
   currentProgress: PollProgressEnum,
   createdAt: string,
   updatedAt: string,
@@ -51,7 +53,8 @@ export interface State {
   userInfo: UserInfo | null,
   polls: Polls,
   proposals: Proposals,
-  inviteIds: InviteIds
+  inviteIds: InviteIds,
+  requestsInFlight:  Set<String>
 }
 
 interface BaseAction {
@@ -66,10 +69,12 @@ export interface AuthCallbackAction extends BaseAction {
 
 export interface RequestHomeResourceAction extends BaseAction {
   type: "RequestHomeResource",
+  uuid: string
 }
 
 export interface HomeResourceResponseAction extends BaseAction {
   type: "HomeResourceResponse",
+  uuid: string,
   polls: Polls,
   inviteIds: InviteIds
 }
