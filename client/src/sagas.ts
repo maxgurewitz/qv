@@ -1,7 +1,7 @@
 import { push } from 'connected-react-router';
 import { select } from 'redux-saga/effects';
 import _ from 'lodash';
-import { put, takeLeading, takeEvery, all, call } from 'redux-saga/effects'
+import { take, put, takeLeading, takeEvery, all, call } from 'redux-saga/effects'
 import { login, logOut } from './auth';
 import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction } from './types';
 import { getUserInfo, getHomeResource } from './api';
@@ -65,10 +65,15 @@ function* initialize(action: InitializeAction) {
 }
 
 function* requestHomeResource(action: RequestHomeResourceAction) {
-  let state: State = yield select(state => state);
-  if (state.accessToken != null && state.userInfo != null) {
-    let homeResource: HomeResource | null = null;
+  let maybeUserInfo: UserInfo | null = yield select(state => state.primary.userInfo);
 
+  if (!maybeUserInfo) {
+    yield take('UserInfo');
+  }
+  let homeResource: HomeResource | null = null;
+  let state: State = yield select(state => state.primary);
+
+  if (state.accessToken != null && state.userInfo != null) {
     try {
       homeResource = yield getHomeResource(state.accessToken);
     } catch (e) {
@@ -77,8 +82,8 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
     }
 
     if (homeResource != null) {
-      const inviteIds = {
-        [state.userInfo.email]: homeResource.inviteIds
+      const invitePollIds = {
+        [state.userInfo.email]: homeResource.invitePollIds
       };
       const polls: Polls = _.keyBy(homeResource.polls, 'id');
 
@@ -86,7 +91,7 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
         source: 'internal',
         uuid: action.uuid,
         type: 'HomeResourceResponse',
-        inviteIds,
+        invitePollIds,
         polls
       };
 

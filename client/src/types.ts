@@ -2,7 +2,7 @@ import { RouterState } from 'connected-react-router';
 
 export interface HomeResource {
   polls: Poll[],
-  inviteIds: number[]
+  invitePollIds: number[]
 }
 
 export interface UserInfo {
@@ -43,7 +43,7 @@ export interface Proposals {
   [pollId: number]: Array<Proposal> | null
 }
 
-export interface InviteIds {
+export interface InvitePollIds {
   // email to poll id
   [email: string]: Array<number>
 }
@@ -53,7 +53,7 @@ export interface State {
   userInfo: UserInfo | null,
   polls: Polls,
   proposals: Proposals,
-  inviteIds: InviteIds,
+  invitePollIds: InvitePollIds,
   requestsInFlight:  Set<String>
 }
 
@@ -76,7 +76,7 @@ export interface HomeResourceResponseAction extends BaseAction {
   type: "HomeResourceResponse",
   uuid: string,
   polls: Polls,
-  inviteIds: InviteIds
+  invitePollIds: InvitePollIds
 }
 
 export interface LoginAction extends BaseAction {

@@ -5,7 +5,7 @@ import { connect, MapStateToPropsParam } from 'react-redux';
 import { Dispatch } from 'redux';
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { Action, CombinedState, UserInfo, Polls, InviteIds } from './types';
+import { Action, CombinedState, UserInfo, Polls, InvitePollIds } from './types';
 import styles from './Home.module.css';
 
 interface HomeState {
@@ -36,9 +36,9 @@ class Home extends React.Component<HomeProps, HomeState> {
       poll !== null && this.props.userInfo !== null && poll.email === this.props.userInfo.email
     );
 
-    // TODO switch invite ids to set
+    // TODO switch invite ids to ordered set
     const invitePollIds = this.props.userInfo !== null ?
-      this.props.inviteIds[this.props.userInfo.email] :
+      this.props.invitePollIds[this.props.userInfo.email] :
       [];
 
     const invitePolls = invitePollIds.map(id => this.props.polls[id]).filter(poll => !!poll);
@@ -55,7 +55,7 @@ type HomeProps = HomeStateProps & HomeDispatchProps;
 interface HomeStateProps {
   userInfo: UserInfo | null,
   polls: Polls,
-  inviteIds: InviteIds,
+  invitePollIds: InvitePollIds,
   requestsInFlight: Set<String>
 }
 
@@ -64,7 +64,7 @@ const mapStateToProps: MapStateToPropsParam<HomeStateProps, {}, CombinedState> =
     userInfo: state.primary.userInfo,
     polls: state.primary.polls,
     requestsInFlight: state.primary.requestsInFlight,
-    inviteIds: state.primary.inviteIds
+    invitePollIds: state.primary.invitePollIds
   };
 };
 

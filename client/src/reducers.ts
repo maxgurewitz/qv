@@ -9,7 +9,7 @@ const initialState: State = {
   userInfo: null,
   polls: {},
   proposals: {},
-  inviteIds: {},
+  invitePollIds: {},
   requestsInFlight: new Set()
 };
 
@@ -30,9 +30,7 @@ function primaryReducer(state = initialState, action: Action): State {
       return state;
 
     case "HomeResourceResponse": 
-      const inviteIds = _.mergeWith(state.inviteIds, action.inviteIds, (stateIds: number[], actionIds: number[]) =>   
-        _.uniq(stateIds.concat(actionIds))
-      );
+      const inviteIds = _.mergeWith(state.invitePollIds, action.invitePollIds, (stateIds: number[], actionIds: number[]) =>  _.uniq((stateIds || []).concat(actionIds)));
 
       state.requestsInFlight.delete(action.uuid);
 

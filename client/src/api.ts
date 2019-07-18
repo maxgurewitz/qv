@@ -4,15 +4,17 @@ import { UserInfo, HomeResource, Poll, PollProgressEnum} from './types';
 const BASE_URL = 'http://localhost:8000/api';
 
 export async function getHomeResource(token: string): Promise<HomeResource> {
+  console.log('loc5', token);
   const response = await axios({
     method: 'get',
-    url: `${BASE_URL}/private/user-info`,
+    url: `${BASE_URL}/private/home`,
     headers: {
       'Authorization': `Bearer ${token}`
     }
   });
+  console.log('loc1', response.data)
   const polls: Poll[] = response.data.polls.map((p: any) => {
-    const {id, email, title, summary, full_description_link, createdAt, updatedAt } = p;
+    const {id, email, title, summary, full_description_link, created_at, updated_at } = p;
     let progress = null;
     if (p.progress === 'in_progress') {
       progress = PollProgressEnum.InProgress;
@@ -28,15 +30,15 @@ export async function getHomeResource(token: string): Promise<HomeResource> {
       progress, 
       summary, 
       fullDescriptionLink: full_description_link,
-      createdAt, 
-      updatedAt 
+      createdAt: created_at, 
+      updatedAt: updated_at 
     };
   });
-  const {inviteIds} = response.data;
+  const {invite_poll_ids} = response.data;
 
   return {
     polls,
-    inviteIds
+    invitePollIds: invite_poll_ids
   };
 }
 export async function getUserInfo(token: string): Promise<UserInfo> {
@@ -47,7 +49,7 @@ export async function getUserInfo(token: string): Promise<UserInfo> {
       'Authorization': `Bearer ${token}`
     }
   });
-  const {email, email_verified, name, locale, picture} = response.data;
+  const {email, email_verified, name, locale, picture} = response.data.user;
 
   const userInfo = {
     email,
