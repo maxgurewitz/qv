@@ -77,8 +77,13 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
     try {
       homeResource = yield getHomeResource(state.accessToken);
     } catch (e) {
-      // FIXME need to finish request in case request fails
       console.error("Unable to retrieve user info", e);
+
+      yield put({
+        source: 'internal',
+        type: 'NoOpResponse',
+        uuid: action.uuid,
+      });
     }
 
     if (homeResource != null) {

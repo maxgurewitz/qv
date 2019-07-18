@@ -4,7 +4,6 @@ import { UserInfo, HomeResource, Poll, PollProgressEnum} from './types';
 const BASE_URL = 'http://localhost:8000/api';
 
 export async function getHomeResource(token: string): Promise<HomeResource> {
-  console.log('loc5', token);
   const response = await axios({
     method: 'get',
     url: `${BASE_URL}/private/home`,
@@ -12,7 +11,7 @@ export async function getHomeResource(token: string): Promise<HomeResource> {
       'Authorization': `Bearer ${token}`
     }
   });
-  console.log('loc1', response.data)
+
   const polls: Poll[] = response.data.polls.map((p: any) => {
     const {id, email, title, summary, full_description_link, created_at, updated_at } = p;
     let progress = null;

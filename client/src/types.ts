@@ -79,6 +79,11 @@ export interface HomeResourceResponseAction extends BaseAction {
   invitePollIds: InvitePollIds
 }
 
+export interface NoOpResponseAction extends BaseAction {
+  type: "NoOpResponse",
+  uuid: string,
+}
+
 export interface LoginAction extends BaseAction {
   type: "Login"
 }
@@ -114,6 +119,7 @@ export type Action =
   RequestHomeResourceAction |
   HomeResourceResponseAction |
   LogOutAction | 
+  NoOpResponseAction |
   AuthCallbackAction | 
   UserInfoAction
   ;

@@ -29,6 +29,10 @@ function primaryReducer(state = initialState, action: Action): State {
       state.userInfo = null;
       return state;
 
+    case "NoOpResponse":
+      state.requestsInFlight.delete(action.uuid);
+      return state;
+
     case "HomeResourceResponse": 
       const inviteIds = _.mergeWith(state.invitePollIds, action.invitePollIds, (stateIds: number[], actionIds: number[]) =>  _.uniq((stateIds || []).concat(actionIds)));
 
