@@ -45,6 +45,7 @@ class Home extends React.Component<HomeProps, HomeState> {
 
     return (
       <Container maxWidth="sm">
+        foo
       </Container>
     );
   }

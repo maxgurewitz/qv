@@ -2,6 +2,7 @@ import { combineReducers } from 'redux'
 import _ from 'lodash';
 import { connectRouter } from 'connected-react-router'
 import { History } from 'history';
+import produce from 'immer';
 import { State, Action } from './types';
 
 const initialState: State = {
@@ -18,46 +19,48 @@ function primaryReducer(state = initialState, action: Action): State {
     return state;
   }
 
-  switch (action.type) {
-    case "UserInfo":
-      state.userInfo = action.userInfo;
-      state.accessToken = action.accessToken;
-      return state;
+  return produce(state, draft => {
+    switch (action.type) {
+      case "UserInfo":
+        draft.userInfo = action.userInfo;
+        draft.accessToken = action.accessToken;
+        return draft;
 
-    case "LogOut":
-      state.accessToken = null;
-      state.userInfo = null;
-      return state;
+      case "LogOut":
+        draft.accessToken = null;
+        draft.userInfo = null;
+        return draft;
 
-    case "NoOpResponse":
-      state.requestsInFlight.delete(action.uuid);
-      return state;
+      case "NoOpResponse":
+        draft.requestsInFlight.delete(action.uuid);
+        return draft;
 
-    case "HomeResourceResponse": 
-      const inviteIds = _.mergeWith(state.invitePollIds, action.invitePollIds, (stateIds: number[], actionIds: number[]) =>  _.uniq((stateIds || []).concat(actionIds)));
+      case "HomeResourceResponse": 
+        const inviteIds = _.mergeWith(draft.invitePollIds, action.invitePollIds, (draftIds: number[], actionIds: number[]) =>  _.uniq((draftIds || []).concat(actionIds)));
 
-      state.requestsInFlight.delete(action.uuid);
+        draft.requestsInFlight.delete(action.uuid);
 
-      return _.assign(state, {
-        polls: _.assign(state.polls, action.polls),
-        inviteIds
-      });
-    case "Initialize":
-      return state;
+        return _.assign(draft, {
+          polls: _.assign(draft.polls, action.polls),
+          inviteIds
+        });
+      case "Initialize":
+        return draft;
 
-    case "Login":
-      return state;
+      case "Login":
+        return draft;
 
-    case "AuthCallback":
-      return state;
+      case "AuthCallback":
+        return draft;
 
-    case "RequestHomeResource":
-      state.requestsInFlight.add(action.uuid);
-      return state;
+      case "RequestHomeResource":
+        draft.requestsInFlight.add(action.uuid);
+        return draft;
 
-    case "NoOp":
-      return state;
-  }
+      case "NoOp":
+        return draft;
+    }
+  });
 }
 
 export default (history: History) => combineReducers({
