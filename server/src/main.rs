@@ -159,17 +159,41 @@ fn get_poll_route(
   Ok(HttpResponse::Ok().json(resource))
 }
 
-fn update_proposal_route(
+fn delete_proposal_route(
   _data: web::Data<middleware::AppData>,
   req: HttpRequest,
 ) -> Result<HttpResponse, Error> {
-  let _poll_id = &req.match_info()["proposal_id"];
-  // FIXME check that user is owner
+  Ok(
+    HttpResponse::Ok()
+      .json(GenericJsonResponse { 
+        message: "succesfully updated proposal".to_string()
+      })
+  )
+}
+
+fn update_proposal_route(
+  data: web::Data<middleware::AppData>,
+  proposal_id_param: actix_web::web::Path<i32>,
+  payload: Json<CreateProposalPayload>,
+) -> Result<HttpResponse, Error> {
+  use schema::proposals;
+  use schema::proposals::dsl::*;
+  let proposal_id = proposal_id_param.into_inner();
+
+  let connection = data
+    .pg_pool
+    .get()
+    .map_err(map_to_internal_service_err)?;
+
+  // diesel::update(proposals.find(&proposal_id))
+  //   .set(&payload)
+  //   .execute(&*connection);
 
   Ok(
     HttpResponse::Ok()
-      .content_type("application/json")
-      .body("{ \"message\": \"success\" }"),
+      .json(GenericJsonResponse { 
+        message: "succesfully updated proposal".to_string()
+      })
   )
 }
 
@@ -508,7 +532,8 @@ fn main() {
               )
               .service(
                 web::scope("/proposals/{proposal_id}")
-                  .route("", web::put().to(update_proposal_route))
+                  .route("", web::patch().to(update_proposal_route))
+                  .route("", web::delete().to(delete_proposal_route))
                   .route("/vote", web::put().to(assign_vote_points_route))
               )
           )

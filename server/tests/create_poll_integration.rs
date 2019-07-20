@@ -20,6 +20,8 @@ fn create_poll_integration() {
     let create_poll_payload = qv::models::CreatePollPayload {
       title: "test-poll".to_string(),
       poll_type: "qv".to_string(),
+      summary: "poll summary".to_string(),
+      full_description_link: Option::None
     };
 
     let create_poll_resource: qv::models::CreatePollResource = test_resources

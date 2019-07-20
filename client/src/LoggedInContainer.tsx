@@ -6,9 +6,11 @@ import Toolbar from '@material-ui/core/Toolbar';
 import React from 'react';
 import { Dispatch } from 'redux';
 import { connect, MapStateToPropsParam } from 'react-redux';
+import { Route, Switch } from 'react-router';
 import { Action, CombinedState } from './types';
 import styles from './LoggedIn.module.css';
 import Home from './HomeContainer';
+import NewPoll from './NewPollContainer';
 
 const LoggedIn: React.FC<LoggedInProps> = ({logOut}) => {
   return (
@@ -26,7 +28,10 @@ const LoggedIn: React.FC<LoggedInProps> = ({logOut}) => {
           </Button>
         </Toolbar>
       </AppBar>
-      <Home/>
+      <Switch>
+        <Route path="/app" component={Home}/>
+        <Route path="/new-poll" component={NewPoll}/>
+      </Switch>
     </div>
   );
 };

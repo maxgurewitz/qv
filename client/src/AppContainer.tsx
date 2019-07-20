@@ -24,7 +24,7 @@ const Initialized: React.FC<InitializedProps> = ({ loggedIn }) => {
           <Redirect to="/app" /> :
           <Landing />
       )} />
-      <Route path="/app" render={() => (
+      <Route path="/:path(app|new-poll)" render={() => (
         loggedIn ?
           <LoggedIn /> :
           <Redirect to="/" />

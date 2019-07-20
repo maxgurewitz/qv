@@ -99,6 +99,12 @@ export interface InitializeAction extends BaseAction {
   accessToken: string | null
 }
 
+export interface CreatePollAction extends BaseAction {
+  type: "CreatePoll",
+  summary: string,
+  fullDescriptionLink: string | null
+}
+
 export interface LogOutAction extends BaseAction {
   type: "LogOut"
 }
@@ -121,5 +127,6 @@ export type Action =
   LogOutAction | 
   NoOpResponseAction |
   AuthCallbackAction | 
+  CreatePollAction |
   UserInfoAction
   ;

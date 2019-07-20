@@ -3,9 +3,15 @@ import uuid from 'uuid/v4';
 import _ from 'lodash';
 import { connect, MapStateToPropsParam } from 'react-redux';
 import { Dispatch } from 'redux';
-import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { Action, CombinedState, UserInfo, Polls, InvitePollIds } from './types';
+import List from '@material-ui/core/List';
+import Button from '@material-ui/core/Button';
+import ListItem from '@material-ui/core/ListItem';
+import Link from '@material-ui/core/Link';
+import {Link as RouterLink} from 'react-router-dom';
+// import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import { Poll, Action, CombinedState, UserInfo, Polls, InvitePollIds } from './types';
 import styles from './Home.module.css';
 
 interface HomeState {
@@ -34,19 +40,45 @@ class Home extends React.Component<HomeProps, HomeState> {
 
     const adminPolls = _.filter(this.props.polls, (poll) => 
       poll !== null && this.props.userInfo !== null && poll.email === this.props.userInfo.email
-    );
+    ) as Poll[];
 
     // TODO switch invite ids to ordered set
     const invitePollIds = this.props.userInfo !== null ?
       this.props.invitePollIds[this.props.userInfo.email] :
       [];
 
-    const invitePolls = invitePollIds.map(id => this.props.polls[id]).filter(poll => !!poll);
+    const invitePolls = invitePollIds.map(id => this.props.polls[id]).filter(poll => !!poll) as Poll[];
 
     return (
-      <Container maxWidth="sm">
-        foo
-      </Container>
+      <div>
+        <Button className={styles.createPoll} variant="contained">
+          <Link component={RouterLink} to="/new-poll">
+            Create Poll
+          </Link>
+        </Button> 
+        <List>
+          {
+            _.map(adminPolls, (poll, i) => 
+              (
+                <ListItem key={i}>
+                  <ListItemText primary={poll.title}/>
+                </ListItem>
+              )
+            )
+          }
+        </List>
+        <List>
+          {
+            _.map(invitePolls, (poll, i) => 
+              (
+                <ListItem key={i}>
+                  <ListItemText primary={poll.title}/>
+                </ListItem>
+              )
+            )
+          }
+        </List>
+      </div>
     );
   }
 }
