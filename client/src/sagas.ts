@@ -3,7 +3,7 @@ import { select } from 'redux-saga/effects';
 import _ from 'lodash';
 import { take, put, takeLeading, takeEvery, all, call } from 'redux-saga/effects'
 import { login, logOut } from './auth';
-import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction } from './types';
+import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction, CombinedState } from './types';
 import { getUserInfo, getHomeResource } from './api';
 
 function* watchLogin() {
@@ -48,6 +48,9 @@ function* initialize(action: InitializeAction) {
     }
 
     if (userInfo !== null) {
+      let path: string = yield select((state: CombinedState) => {
+        return state.router.location.pathname;
+      });
       const userInfoAction: UserInfoAction = { 
         source: 'internal',
         type: 'UserInfo',
@@ -55,7 +58,7 @@ function* initialize(action: InitializeAction) {
         accessToken: action.accessToken 
       };
       yield put(userInfoAction);
-      yield put(push('/app'));
+      yield put(push(path));
     } else {
       yield put({ source: 'internal', type: 'LogOut' });
     }
