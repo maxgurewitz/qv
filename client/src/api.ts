@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { UserInfo, HomeResource, Poll, PollProgressEnum} from './types';
 
+// TODO replace as part of build
 const BASE_URL = 'http://localhost:8000/api';
 
 export async function getHomeResource(token: string): Promise<HomeResource> {

@@ -19,15 +19,15 @@ interface InitializedProps {
 const Initialized: React.FC<InitializedProps> = ({ loggedIn }) => {
   return (
     <Switch>
-      <Route exact path="/" render={() => (
-        loggedIn ?
-          <Redirect to="/app" /> :
-          <Landing />
-      )} />
       <Route path="/:path(app|new-poll)" render={() => (
         loggedIn ?
           <LoggedIn /> :
           <Redirect to="/" />
+      )} />
+      <Route exact path="/" render={() => (
+        loggedIn ?
+          <Redirect to="/app" /> :
+          <Landing />
       )} />
       <Route exact path="/auth-callback" render={() => (
         loggedIn ?

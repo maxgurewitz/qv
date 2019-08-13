@@ -75,6 +75,7 @@ pub struct NewPoll<'a> {
 #[derive(Insertable)]
 #[table_name="proposals"]
 pub struct NewProposal<'a> {
+  // TODO add title
   pub summary: &'a str,
   pub full_description_link: Option<String>,
   pub poll_id: &'a i32,
