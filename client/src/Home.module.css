@@ -1,0 +1,15 @@
+.home {
+  height: 100%;
+}
+
+/* FIXME  */
+.createPoll {
+  margin: 2vh;
+}
+
+.loading {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
