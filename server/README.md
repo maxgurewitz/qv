@@ -30,8 +30,16 @@ RUST_BACKTRACE=1
 The server can be run with vanilla cargo from the `server` directory with,
 
 ```
+docker-compose up
+```
+
+to bring up the service dependencies,
+
+```
 cargo run
 ```
+
+to start the server.
 
 Alternatively watch for changes with `cargo-watch`, installed with,
 
