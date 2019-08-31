@@ -18,9 +18,14 @@ interface ProposalForm {
   fullDescriptionLink: string | null,
 }
 
+interface UserInviteForm {
+  email: string | null,
+}
+
 interface NewPollState {
   initializationUuid: string,
   proposalForms: ProposalForm[],
+  userInviteForms: UserInviteForm[],
   pollForm: {
     fullDescriptionLink: string | null,
     title: string | null,
@@ -28,11 +33,37 @@ interface NewPollState {
   }
 }
 
+function buildNewUserInviteForm () {
+  return {
+    email: null,
+  };
+}
+
 function buildNewProposalForm () {
   return {
     summary: null,
     fullDescriptionLink: null
   };
+}
+
+function backButton(url: string) {
+  return (
+    <Button variant='contained' >
+      <Link color='inherit' component={RouterLink} to={url}>
+        Back
+      </Link>
+    </Button> 
+  );
+}
+
+function nextButton(enabled: boolean, url: string) {
+  return (
+    <Button color={enabled ? 'primary' : 'secondary'} disabled={!enabled} variant='contained'>
+      <Link color='inherit' component={RouterLink} to={url}>
+        Next
+      </Link>
+    </Button> 
+  );
 }
 
 type OnChangeHandlerFunction = (value: string, draft: NewPollState) => NewPollState;
@@ -54,12 +85,8 @@ class NewPoll extends React.Component<NewPollProps, NewPollState> {
   }
 
   buildOnClickHandler(onChangeHandler: OnChangeHandlerSupplier): MouseEventHandler {
-    console.log('loc2');
     return () => {
-      // FIXME not making it here
-      console.log('loc3');
       this.setState(state => {
-        console.log('loc4');
         return produce(state, draft => 
           onChangeHandler(draft)
         )
@@ -69,8 +96,10 @@ class NewPoll extends React.Component<NewPollProps, NewPollState> {
 
   constructor(props: NewPollProps) {
     super(props);
+
     this.state = {
       initializationUuid: uuid(),
+      userInviteForms: [buildNewUserInviteForm()],
       proposalForms: [buildNewProposalForm()],
       pollForm: {
         fullDescriptionLink: null,
@@ -81,137 +110,172 @@ class NewPoll extends React.Component<NewPollProps, NewPollState> {
     this.props.initialize(this.state.initializationUuid);
   }
 
+  renderProposals() {
+    const areAllProposalsValid = _.every(this.state.proposalForms, propsalForm => !_.isEmpty(propsalForm.summary)); 
+
+    return (
+      <div>
+        proposals form
+        <form>
+          {_.map(this.state.proposalForms, (proposalForm, i) => (
+            <div key={i}>
+              <TextField
+                label='Summary'
+                required
+                value={ proposalForm.summary === null ? '' : proposalForm.summary }
+                onChange={
+                  this.buildOnInputHandler((summary, draft) => {
+                    draft.proposalForms[i].summary = summary;
+                    return draft;
+                  })
+                }
+                margin='normal'
+              />
+              <TextField
+                label='Full Description Link'
+                value={ proposalForm.fullDescriptionLink === null ? '' : proposalForm.fullDescriptionLink }
+                onChange={
+                  this.buildOnInputHandler((fullDescriptionLink, draft) => {
+                    draft.proposalForms[i].fullDescriptionLink = fullDescriptionLink;
+                    return draft;
+                  })
+                }
+                margin='normal'
+              />
+
+              { i > 0 ?
+                <IconButton onClick={this.buildOnClickHandler((draft) => {
+                  draft.proposalForms.splice(i, 1);
+                  return draft;
+                })}>
+                  <Icon color='primary'> remove_circle </Icon>
+                </IconButton> : 
+                <React.Fragment/>
+              }
+            </div>
+          ))}
+        </form>
+
+        <IconButton onClick={this.buildOnClickHandler((draft) => {
+          draft.proposalForms.push(buildNewProposalForm());
+          return draft;
+        })}>
+          <Icon color='primary'> add_circle </Icon>
+        </IconButton>
+
+        { backButton('/new-poll') }
+        { nextButton(areAllProposalsValid, '/new-poll/user-invites') }
+      </div>
+    );
+  }
+
+  renderUserInvites() {
+    const areAllInvitesValid = _.every(this.state.userInviteForms, propsalForm => !_.isEmpty(propsalForm.email)); 
+
+    return (
+      <div>user invites form
+        <form>
+          {_.map(this.state.userInviteForms, (userInviteForm, i) => (
+            <div key={i}>
+              <TextField
+                label='Email'
+                required
+                value={ userInviteForm.email === null ? '' : userInviteForm.email }
+                onChange={
+                  this.buildOnInputHandler((email, draft) => {
+                    draft.userInviteForms[i].email = email;
+                    return draft;
+                  })
+                }
+                margin='normal'
+              />
+
+              { i > 0 ?
+                <IconButton onClick={this.buildOnClickHandler((draft) => {
+                  draft.userInviteForms.splice(i, 1);
+                  return draft;
+                })}>
+                  <Icon color='primary'> remove_circle </Icon>
+                </IconButton> : 
+                <React.Fragment/>
+              }
+            </div>
+          ))}
+
+          <IconButton onClick={this.buildOnClickHandler((draft) => {
+            draft.userInviteForms.push(buildNewUserInviteForm());
+            return draft;
+          })}>
+            <Icon color='primary'> add_circle </Icon>
+          </IconButton>
+        </form>
+        { backButton('/new-poll/proposals') }
+        { nextButton(areAllInvitesValid, '/new-poll/finished') }
+      </div>
+    );
+  }
+
+  renderNewPoll() {
+    const isPollValid = !_.isEmpty(this.state.pollForm.title) && !_.isEmpty(this.state.pollForm.summary);
+
+    return (
+      <div>
+        poll form
+
+        <form noValidate autoComplete='off'>
+          <TextField
+            label='Title'
+            required
+            value={ this.state.pollForm.title === null ? '' : this.state.pollForm.title }
+            onChange={
+              this.buildOnInputHandler((title, draft) => {
+                  draft.pollForm.title = title;
+                  return draft;
+              })
+            }
+            margin='normal'
+          />
+
+          <TextField
+            label='Summary'
+            required
+            value={this.state.pollForm.summary === null ? '' : this.state.pollForm.summary }
+            onChange={
+              this.buildOnInputHandler((summary, draft) => {
+                  draft.pollForm.summary = summary;
+                  return draft;
+              })
+            }
+            margin='normal'
+          />
+
+          <TextField
+            label='Full Description Link'
+            value={this.state.pollForm.fullDescriptionLink === null ? '' : this.state.pollForm.fullDescriptionLink }
+            onChange={
+              this.buildOnInputHandler((fullDescriptionLink, draft) => {
+                  draft.pollForm.fullDescriptionLink = fullDescriptionLink;
+                  return draft;
+              })
+            }
+            margin='normal'
+          />
+        </form>
+        { nextButton(isPollValid, '/new-poll/proposals') }
+      </div>
+    );
+  }
+
   render() {
     return (
       <div>
         <Switch>
-          <Route path='/new-poll/proposals' render={() => {
-            const areAllProposalsValid = _.every(this.state.proposalForms, propsalForm => !_.isEmpty(propsalForm.summary)); 
-
-            return (
-              <div>
-                proposals form
-                <form>
-                {_.map(this.state.proposalForms, (proposalForm, i) => (
-                  <div key={i}>
-                    <TextField
-                      label='Summary'
-                      required
-                      value={ proposalForm.summary === null ? '' : proposalForm.summary }
-                      onChange={
-                        this.buildOnInputHandler((summary, draft) => {
-                          draft.proposalForms[i].summary = summary;
-                          return draft;
-                        })
-                      }
-                      margin='normal'
-                    />
-                    <TextField
-                      label='Full Description Link'
-                      value={ proposalForm.fullDescriptionLink === null ? '' : proposalForm.fullDescriptionLink }
-                      onChange={
-                        this.buildOnInputHandler((fullDescriptionLink, draft) => {
-                          draft.proposalForms[i].fullDescriptionLink = fullDescriptionLink;
-                          return draft;
-                        })
-                      }
-                      margin='normal'
-                    />
-
-                    { i > 0 ?
-                      <IconButton onClick={this.buildOnClickHandler((draft) => {
-                        draft.proposalForms.splice(i, 1);
-                        return draft;
-                      })}>
-                        <Icon color='primary'> remove_circle </Icon>
-                      </IconButton> : 
-                      <React.Fragment/>
-                    }
-                  </div>
-                ))}
-                </form>
-
-                <IconButton onClick={this.buildOnClickHandler((draft) => {
-                  draft.proposalForms.push(buildNewProposalForm());
-                  return draft;
-                })}>
-                  <Icon color='primary'> add_circle </Icon>
-                </IconButton>
-
-                <Button variant='contained' >
-                  <Link color='inherit' component={RouterLink} to='/new-poll'>
-                    Back
-                  </Link>
-                </Button> 
-
-                <Button color={areAllProposalsValid ? 'primary' : 'secondary'} disabled={!areAllProposalsValid} variant='contained'>
-                  <Link color='inherit' component={RouterLink} to='/new-poll/user-invites'>
-                    Next
-                  </Link>
-                </Button> 
-              </div>
-            );
-          }}/>
-          <Route path='/new-poll/user-invites' render={() => (
-            <div>user invites form</div>
-          )}/>
+          <Route path='/new-poll/proposals' render={() => this.renderProposals()}/>
+          <Route path='/new-poll/user-invites' render={() => this.renderUserInvites()}/>
           <Route path='/new-poll/finished' render={() => (
             <div>you have completed your poll</div>
           )}/>
-          <Route path='/new-poll' render={() => {
-            const isPollValid = !_.isEmpty(this.state.pollForm.title) && !_.isEmpty(this.state.pollForm.summary);
-
-            return (
-              <div>
-                poll form
-
-                <form noValidate autoComplete='off'>
-                  <TextField
-                    label='Title'
-                    required
-                    value={ this.state.pollForm.title === null ? '' : this.state.pollForm.title }
-                    onChange={
-                      this.buildOnInputHandler((title, draft) => {
-                          draft.pollForm.title = title;
-                          return draft;
-                      })
-                    }
-                    margin='normal'
-                  />
-
-                  <TextField
-                    label='Summary'
-                    required
-                    value={this.state.pollForm.summary === null ? '' : this.state.pollForm.summary }
-                    onChange={
-                      this.buildOnInputHandler((summary, draft) => {
-                          draft.pollForm.summary = summary;
-                          return draft;
-                      })
-                    }
-                    margin='normal'
-                  />
-
-                  <TextField
-                    label='Full Description Link'
-                    value={this.state.pollForm.fullDescriptionLink === null ? '' : this.state.pollForm.fullDescriptionLink }
-                    onChange={
-                      this.buildOnInputHandler((fullDescriptionLink, draft) => {
-                          draft.pollForm.fullDescriptionLink = fullDescriptionLink;
-                          return draft;
-                      })
-                    }
-                    margin='normal'
-                  />
-                </form>
-                <Button color={isPollValid ? 'primary' : 'secondary'} disabled={!isPollValid} variant='contained'>
-                  <Link color='inherit' component={RouterLink} to='/new-poll/proposals'>
-                    Next
-                  </Link>
-                </Button> 
-              </div>
-            );
-          }}/>
+          <Route path='/new-poll' render={() => this.renderNewPoll()}/>
         </Switch>
       </div>
     );
