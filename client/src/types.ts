@@ -1,5 +1,27 @@
 import { RouterState } from 'connected-react-router';
 
+export interface NotStartedRequestStatus {
+  type: 'NotStartedRequestStatus'
+}
+
+export interface InProgressRequestStatus {
+  type: 'InProgressRequestStatus'
+}
+
+export interface SuccessfulRequestStatus {
+  type: 'SuccessfulRequestStatus'
+}
+
+export interface FailedRequestStatus {
+  type: 'FailedRequestStatus'
+}
+
+export type RequestStatus = 
+  NotStartedRequestStatus |
+  InProgressRequestStatus |
+  SuccessfulRequestStatus |
+  FailedRequestStatus;
+
 export interface HomeResource {
   polls: Poll[],
   invitePollIds: number[]
@@ -54,6 +76,7 @@ export interface State {
   polls: Polls,
   proposals: Proposals,
   invitePollIds: InvitePollIds,
+  // FIXME refactor to specific unstarted/in progress/successful/failed enum
   requestsInFlight:  Set<String>
 }
 

@@ -171,6 +171,7 @@ fn delete_proposal_route(
   )
 }
 
+// FIXME implement
 fn update_proposal_route(
   data: web::Data<middleware::AppData>,
   proposal_id_param: actix_web::web::Path<i32>,
