@@ -8,19 +8,21 @@ export interface InProgressRequestStatus {
   type: 'InProgressRequestStatus'
 }
 
-export interface SuccessfulRequestStatus {
-  type: 'SuccessfulRequestStatus'
+export interface SuccessfulRequestStatus<R> {
+  type: 'SuccessfulRequestStatus',
+  response: R
 }
 
-export interface FailedRequestStatus {
-  type: 'FailedRequestStatus'
+export interface FailedRequestStatus<E> {
+  type: 'FailedRequestStatus',
+  error: E
 }
 
-export type RequestStatus = 
+export type RequestStatus<R, E> =
   NotStartedRequestStatus |
   InProgressRequestStatus |
-  SuccessfulRequestStatus |
-  FailedRequestStatus;
+  SuccessfulRequestStatus<R> |
+  FailedRequestStatus<E>;
 
 export interface HomeResource {
   polls: Poll[],
@@ -77,7 +79,7 @@ export interface State {
   proposals: Proposals,
   invitePollIds: InvitePollIds,
   // FIXME refactor to specific unstarted/in progress/successful/failed enum
-  requestsInFlight:  Set<String>
+  requestsInFlight: Set<String>
 }
 
 interface BaseAction {
@@ -141,15 +143,15 @@ export interface CombinedState {
   primary: State
 }
 
-export type Action = 
+export type Action =
   NoOpAction |
   InitializeAction |
   LoginAction |
   RequestHomeResourceAction |
   HomeResourceResponseAction |
-  LogOutAction | 
+  LogOutAction |
   NoOpResponseAction |
-  AuthCallbackAction | 
+  AuthCallbackAction |
   CreatePollAction |
   UserInfoAction
   ;
