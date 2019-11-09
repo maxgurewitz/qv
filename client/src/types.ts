@@ -1,4 +1,5 @@
 import { RouterState } from 'connected-react-router';
+import ApiError from './ApiError';
 
 export interface NotStartedRequestStatus {
   type: 'NotStartedRequestStatus'
@@ -78,7 +79,7 @@ export interface State {
   polls: Polls,
   proposals: Proposals,
   invitePollIds: InvitePollIds,
-  // FIXME refactor to specific unstarted/in progress/successful/failed enum
+  createPollRequest: RequestStatus<ApiError, Poll>,
   requestsInFlight: Set<String>
 }
 
