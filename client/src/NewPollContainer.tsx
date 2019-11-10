@@ -1,10 +1,15 @@
 import React, { useCallback, useState, SetStateAction } from 'react';
 import _ from 'lodash';
 import { useSelector, useDispatch, connect, MapStateToPropsParam } from 'react-redux';
-import { Dispatch } from 'redux';
 import TextField from '@material-ui/core/TextField';
 import ApiError from './ApiError';
-import { Action, CombinedState, Poll, RequestStatus } from './types';
+import { CombinedState, Poll, RequestStatus } from './types';
+
+interface PollForm {
+  fullDescriptionLink: string | null,
+  title: string | null,
+  summary: string | null,
+}
 
 interface NewPollFormApplicationState {
   createPollRequest: RequestStatus<ApiError, Poll>,
@@ -87,27 +92,27 @@ const NewPoll2: React.FC = () => {
 
 export default NewPoll2;
 
-interface ProposalForm {
-  summary: string | null,
-  fullDescriptionLink: string | null,
-}
+// interface ProposalForm {
+//   summary: string | null,
+//   fullDescriptionLink: string | null,
+// }
 
-interface UserInviteForm {
-  email: string | null,
-}
+// interface UserInviteForm {
+//   email: string | null,
+// }
 
-interface PollForm {
-  fullDescriptionLink: string | null,
-  title: string | null,
-  summary: string | null,
-}
+// interface PollForm {
+//   fullDescriptionLink: string | null,
+//   title: string | null,
+//   summary: string | null,
+// }
 
-interface NewPollState {
-  initializationUuid: string,
-  proposalForms: ProposalForm[],
-  userInviteForms: UserInviteForm[],
-  pollForm: PollForm
-}
+// interface NewPollState {
+//   initializationUuid: string,
+//   proposalForms: ProposalForm[],
+//   userInviteForms: UserInviteForm[],
+//   pollForm: PollForm
+// }
 
 // function buildNewUserInviteForm() {
 //   return {
