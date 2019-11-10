@@ -80,7 +80,6 @@ export interface State {
   proposals: Proposals,
   invitePollIds: InvitePollIds,
   createPollRequest: RequestStatus<ApiError, Poll>,
-  requestsInFlight: Set<String>
 }
 
 interface BaseAction {

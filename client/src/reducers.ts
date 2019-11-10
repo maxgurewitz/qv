@@ -11,7 +11,9 @@ const initialState: State = {
   polls: {},
   proposals: {},
   invitePollIds: {},
-  requestsInFlight: new Set()
+  createPollRequest: {
+    type: 'NotStartedRequestStatus'
+  }
 };
 
 function primaryReducer(state = initialState, action: Action): State {
@@ -32,13 +34,10 @@ function primaryReducer(state = initialState, action: Action): State {
         return draft;
 
       case "NoOpResponse":
-        draft.requestsInFlight.delete(action.uuid);
         return draft;
 
-      case "HomeResourceResponse": 
-        const inviteIds = _.mergeWith(draft.invitePollIds, action.invitePollIds, (draftIds: number[], actionIds: number[]) =>  _.uniq((draftIds || []).concat(actionIds)));
-
-        draft.requestsInFlight.delete(action.uuid);
+      case "HomeResourceResponse":
+        const inviteIds = _.mergeWith(draft.invitePollIds, action.invitePollIds, (draftIds: number[], actionIds: number[]) => _.uniq((draftIds || []).concat(actionIds)));
 
         return _.assign(draft, {
           polls: _.assign(draft.polls, action.polls),
@@ -54,7 +53,6 @@ function primaryReducer(state = initialState, action: Action): State {
         return draft;
 
       case "RequestHomeResource":
-        draft.requestsInFlight.add(action.uuid);
         return draft;
 
       case "NoOp":
