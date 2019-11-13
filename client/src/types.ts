@@ -1,5 +1,5 @@
 import { RouterState } from 'connected-react-router';
-import ApiError from './ApiError';
+import { AxiosError } from 'axios';
 
 export interface NotStartedRequestStatus {
   type: 'NotStartedRequestStatus'
@@ -79,7 +79,8 @@ export interface State {
   polls: Polls,
   proposals: Proposals,
   invitePollIds: InvitePollIds,
-  createPollRequest: RequestStatus<ApiError, Poll>,
+  createPollRequest: RequestStatus<AxiosError, Poll>,
+  initializeRequest: RequestStatus<AxiosError, void>,
 }
 
 interface BaseAction {
@@ -94,12 +95,10 @@ export interface AuthCallbackAction extends BaseAction {
 
 export interface RequestHomeResourceAction extends BaseAction {
   type: "RequestHomeResource",
-  uuid: string
 }
 
 export interface HomeResourceResponseAction extends BaseAction {
   type: "HomeResourceResponse",
-  uuid: string,
   polls: Polls,
   invitePollIds: InvitePollIds
 }
@@ -122,6 +121,11 @@ export interface UserInfoAction extends BaseAction {
 export interface InitializeAction extends BaseAction {
   type: "Initialize",
   accessToken: string | null
+}
+
+export interface CreatePollResponseAction extends BaseAction {
+  type: "CreatePollResponse",
+  response: AxiosError | Poll
 }
 
 export interface CreatePollAction extends BaseAction {
@@ -153,5 +157,6 @@ export type Action =
   NoOpResponseAction |
   AuthCallbackAction |
   CreatePollAction |
+  CreatePollResponseAction |
   UserInfoAction
   ;

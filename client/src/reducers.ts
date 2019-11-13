@@ -11,6 +11,9 @@ const initialState: State = {
   polls: {},
   proposals: {},
   invitePollIds: {},
+  initializeRequest: {
+    type: 'NotStartedRequestStatus'
+  },
   createPollRequest: {
     type: 'NotStartedRequestStatus'
   }

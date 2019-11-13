@@ -5,6 +5,7 @@ import { take, put, takeLeading, takeEvery, all, call } from 'redux-saga/effects
 import { login, logOut } from './auth';
 import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction, CombinedState } from './types';
 import { getUserInfo, getHomeResource } from './api';
+import { AxiosError } from 'axios';
 
 function* watchLogin() {
   yield takeEvery('Login', login)
@@ -26,11 +27,11 @@ function* onAuthCallback(action: AuthCallbackAction) {
       yield put({ source: 'internal', type: 'LogOut' });
     } else {
       window.localStorage.setItem("token", action.accessToken);
-      const userInfoAction : UserInfoAction = { 
+      const userInfoAction: UserInfoAction = {
         source: 'internal',
         type: 'UserInfo',
-        userInfo, 
-        accessToken: action.accessToken 
+        userInfo,
+        accessToken: action.accessToken
       };
       yield put(userInfoAction);
       yield put(push('/app'));
@@ -51,11 +52,11 @@ function* initialize(action: InitializeAction) {
       let path: string = yield select((state: CombinedState) => {
         return state.router.location.pathname;
       });
-      const userInfoAction: UserInfoAction = { 
+      const userInfoAction: UserInfoAction = {
         source: 'internal',
         type: 'UserInfo',
         userInfo: userInfo,
-        accessToken: action.accessToken 
+        accessToken: action.accessToken
       };
       yield put(userInfoAction);
       yield put(push(path));
@@ -63,8 +64,18 @@ function* initialize(action: InitializeAction) {
       yield put({ source: 'internal', type: 'LogOut' });
     }
   } else {
-      yield put({ source: 'internal', type: 'LogOut' });
+    yield put({ source: 'internal', type: 'LogOut' });
   }
+}
+
+function* handleApiError(e: AxiosError) {
+  console.error('Api request failed', e);
+
+  if (e.code === '401' || e.code === '403') {
+    yield put({ type: 'LogOut' });
+  }
+
+  throw e;
 }
 
 function* requestHomeResource(action: RequestHomeResourceAction) {
@@ -78,16 +89,8 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
 
   if (state.accessToken != null && state.userInfo != null) {
     try {
-      homeResource = yield getHomeResource(state.accessToken);
-    } catch (e) {
-      console.error("Unable to retrieve user info", e);
-
-      yield put({
-        source: 'internal',
-        type: 'NoOpResponse',
-        uuid: action.uuid,
-      });
-    }
+      homeResource = yield (getHomeResource(state.accessToken).catch(handleApiError));
+    } catch (e) { }
 
     if (homeResource != null) {
       const invitePollIds = {
@@ -97,7 +100,6 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
 
       const homeResourceResponse: HomeResourceResponseAction = {
         source: 'internal',
-        uuid: action.uuid,
         type: 'HomeResourceResponse',
         invitePollIds,
         polls

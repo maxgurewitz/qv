@@ -2,8 +2,8 @@ import React, { useCallback, useState, SetStateAction } from 'react';
 import _ from 'lodash';
 import { useSelector, useDispatch, connect, MapStateToPropsParam } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
-import ApiError from './ApiError';
 import { CombinedState, Poll, RequestStatus } from './types';
+import { AxiosError } from 'axios';
 
 interface PollForm {
   fullDescriptionLink: string | null,
@@ -12,7 +12,7 @@ interface PollForm {
 }
 
 interface NewPollFormApplicationState {
-  createPollRequest: RequestStatus<ApiError, Poll>,
+  createPollRequest: RequestStatus<AxiosError, Poll>,
 }
 
 function initializePollForm(): PollForm {
@@ -50,10 +50,7 @@ const NewPoll2: React.FC = () => {
           value={form.title === null ? '' : form.title}
           onChange={e => {
             const { value } = e.target;
-            updateForm((form: PollForm) => {
-              form.title = value;
-              return form;
-            })
+            updateForm({ ...form, title: value });
           }}
           margin='normal'
         />
@@ -64,10 +61,7 @@ const NewPoll2: React.FC = () => {
           value={form.summary === null ? '' : form.summary}
           onChange={e => {
             const { value } = e.target;
-            updateForm((form: PollForm) => {
-              form.summary = value;
-              return form;
-            })
+            updateForm({ ...form, summary: value });
           }}
           margin='normal'
         />
@@ -77,10 +71,7 @@ const NewPoll2: React.FC = () => {
           value={form.fullDescriptionLink === null ? '' : form.fullDescriptionLink}
           onChange={e => {
             const { value } = e.target;
-            updateForm((form: PollForm) => {
-              form.fullDescriptionLink = value;
-              return form;
-            })
+            updateForm({ ...form, fullDescriptionLink: value });
           }}
           margin='normal'
         />

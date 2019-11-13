@@ -8,15 +8,14 @@ import List from '@material-ui/core/List';
 import Button from '@material-ui/core/Button';
 import ListItem from '@material-ui/core/ListItem';
 import Link from '@material-ui/core/Link';
-import {Link as RouterLink} from 'react-router-dom';
+import { Link as RouterLink, Redirect } from 'react-router-dom';
 // import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import { Poll, Action, CombinedState, UserInfo, Polls, InvitePollIds } from './types';
+import { RequestStatus, Poll, Action, CombinedState, UserInfo, Polls, InvitePollIds } from './types';
 import styles from './Home.module.css';
+import { AxiosError } from 'axios';
 
-interface HomeState {
-  initializationUuid: string
-}
+interface HomeState { }
 
 class Home extends React.Component<HomeProps, HomeState> {
 
@@ -25,29 +24,41 @@ class Home extends React.Component<HomeProps, HomeState> {
     this.state = {
       initializationUuid: uuid()
     };
-    this.props.initialize(this.state.initializationUuid);
+    this.props.initialize();
   }
 
   render() {
-    const isLoading = this.props.requestsInFlight.has(this.state.initializationUuid);
+    const isLoading = this.props.initializeRequest.type === 'InProgressRequestStatus';
+
     if (isLoading) {
       return (
         <div className={styles.loading}>
-          <CircularProgress/>
+          <CircularProgress />
         </div>
       );
     }
 
-    const adminPolls = _.filter(this.props.polls, (poll) => 
-      poll !== null && this.props.userInfo !== null && poll.email === this.props.userInfo.email
+    const isError = this.props.initializeRequest.type === 'FailedRequestStatus';
+
+    // TODO error handling on initialization request
+    if (isError) {
+      return (<div>error</div>);
+    }
+
+    const adminPolls = _.filter(this.props.polls, (poll) =>
+      poll !== null &&
+      this.props.userInfo !== null &&
+      poll.email === this.props.userInfo.email
     ) as Poll[];
 
     // TODO switch invite ids to ordered set
     const invitePollIds = this.props.userInfo !== null ?
-      this.props.invitePollIds[this.props.userInfo.email] :
+      (this.props.invitePollIds[this.props.userInfo.email] || []) :
       [];
 
-    const invitePolls = invitePollIds.map(id => this.props.polls[id]).filter(poll => !!poll) as Poll[];
+    const invitePolls = invitePollIds
+      .map(id => this.props.polls[id])
+      .filter(poll => !!poll) as Poll[];
 
     return (
       <div>
@@ -55,13 +66,13 @@ class Home extends React.Component<HomeProps, HomeState> {
           <Link component={RouterLink} to="/new-poll">
             Create Poll
           </Link>
-        </Button> 
+        </Button>
         <List>
           {
-            _.map(adminPolls, (poll, i) => 
+            _.map(adminPolls, (poll, i) =>
               (
                 <ListItem key={i}>
-                  <ListItemText primary={poll.title}/>
+                  <ListItemText primary={poll.title} />
                 </ListItem>
               )
             )
@@ -69,10 +80,10 @@ class Home extends React.Component<HomeProps, HomeState> {
         </List>
         <List>
           {
-            _.map(invitePolls, (poll, i) => 
+            _.map(invitePolls, (poll, i) =>
               (
                 <ListItem key={i}>
-                  <ListItemText primary={poll.title}/>
+                  <ListItemText primary={poll.title} />
                 </ListItem>
               )
             )
@@ -89,29 +100,28 @@ interface HomeStateProps {
   userInfo: UserInfo | null,
   polls: Polls,
   invitePollIds: InvitePollIds,
-  requestsInFlight: Set<String>
+  initializeRequest: RequestStatus<AxiosError, void>,
 }
 
 const mapStateToProps: MapStateToPropsParam<HomeStateProps, {}, CombinedState> = (state: CombinedState) => {
   return {
     userInfo: state.primary.userInfo,
     polls: state.primary.polls,
-    requestsInFlight: state.primary.requestsInFlight,
+    initializeRequest: state.primary.initializeRequest,
     invitePollIds: state.primary.invitePollIds
   };
 };
 
 interface HomeDispatchProps {
-  initialize: (initializationUuid: string) => void
+  initialize: () => void
 }
 
 function mapDispatchToProps(dispatch: Dispatch<Action>) {
   return {
-    initialize(initializationUuid: string) {
+    initialize() {
       dispatch({
         source: 'internal',
         type: 'RequestHomeResource',
-        uuid: initializationUuid
       });
     }
   };

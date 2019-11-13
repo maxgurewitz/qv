@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { UserInfo, HomeResource, Poll, PollProgressEnum} from './types';
+import { UserInfo, HomeResource, Poll, PollProgressEnum } from './types';
 
 // TODO replace as part of build
 const BASE_URL = 'http://localhost:8000/api';
@@ -14,7 +14,7 @@ export async function getHomeResource(token: string): Promise<HomeResource> {
   });
 
   const polls: Poll[] = response.data.polls.map((p: any) => {
-    const {id, email, title, summary, full_description_link, created_at, updated_at } = p;
+    const { id, email, title, summary, full_description_link, created_at, updated_at } = p;
     let progress = null;
     if (p.progress === 'in_progress') {
       progress = PollProgressEnum.InProgress;
@@ -23,24 +23,25 @@ export async function getHomeResource(token: string): Promise<HomeResource> {
     } else {
       progress = PollProgressEnum.NotStarted;
     }
-    return { 
-      id, 
+    return {
+      id,
       email,
-      title, 
-      progress, 
-      summary, 
+      title,
+      progress,
+      summary,
       fullDescriptionLink: full_description_link,
-      createdAt: created_at, 
-      updatedAt: updated_at 
+      createdAt: created_at,
+      updatedAt: updated_at
     };
   });
-  const {invite_poll_ids} = response.data;
+  const { invite_poll_ids } = response.data;
 
   return {
     polls,
     invitePollIds: invite_poll_ids
   };
 }
+
 export async function getUserInfo(token: string): Promise<UserInfo> {
   const response = await axios({
     method: 'get',
@@ -49,7 +50,7 @@ export async function getUserInfo(token: string): Promise<UserInfo> {
       'Authorization': `Bearer ${token}`
     }
   });
-  const {email, email_verified, name, locale, picture} = response.data.user;
+  const { email, email_verified, name, locale, picture } = response.data.user;
 
   const userInfo = {
     email,
