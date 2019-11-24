@@ -1,15 +1,30 @@
 import { push } from 'connected-react-router';
 import { select } from 'redux-saga/effects';
 import _ from 'lodash';
-import { take, put, takeLeading, takeEvery, all, call } from 'redux-saga/effects'
+import { race, delay, take, put, takeLeading, takeEvery, all, call } from 'redux-saga/effects'
 import { login, logOut } from './auth';
-import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction, CombinedState } from './types';
+import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction, CombinedState, CreatePollAction } from './types';
 // TODO centralize error handling
 import { getUserInfo, getHomeResource } from './api';
 import { AxiosError } from 'axios';
 
 function* watchLogin() {
   yield takeEvery('Login', login)
+}
+
+function* waitForUserInfoPresent() {
+  let maybeUserInfo: UserInfo | null = yield select(state => state.primary.userInfo);
+
+  if (!maybeUserInfo) {
+    const { userInfoAction } = yield race({
+      userInfoAction: take('UserInfo'),
+      delay: delay(5000)
+    });
+
+    if (!userInfoAction) {
+      yield put({ source: 'internal', type: 'LogOut' });
+    }
+  }
 }
 
 function* onAuthCallback(action: AuthCallbackAction) {
@@ -80,11 +95,8 @@ function* handleApiError(e: AxiosError) {
 }
 
 function* requestHomeResource(action: RequestHomeResourceAction) {
-  let maybeUserInfo: UserInfo | null = yield select(state => state.primary.userInfo);
+  yield waitForUserInfoPresent();
 
-  if (!maybeUserInfo) {
-    yield take('UserInfo');
-  }
   let homeResource: HomeResource | null = null;
   let state: State = yield select(state => state.primary);
 
@@ -111,6 +123,14 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
   }
 }
 
+function onCreatePollCallback(action: CreatePollAction) {
+
+}
+
+function* watchCreatePoll() {
+  yield takeLeading('CreatePoll', onCreatePollCallback);
+}
+
 function* watchAuthCallback() {
   yield takeLeading('AuthCallback', onAuthCallback);
 }
@@ -129,6 +149,7 @@ function* watchRequestHomeResource() {
 
 export default function* rootSaga(): IterableIterator<any> {
   yield all([
+    call(watchCreatePoll),
     call(watchLogin),
     call(watchLogOut),
     call(watchAuthCallback),
