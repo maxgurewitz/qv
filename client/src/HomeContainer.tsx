@@ -100,7 +100,7 @@ interface HomeStateProps {
   userInfo: UserInfo | null,
   polls: Polls,
   invitePollIds: InvitePollIds,
-  initializeRequest: RequestStatus<AxiosError, void>,
+  initializeRequest: RequestStatus<void, AxiosError>,
 }
 
 const mapStateToProps: MapStateToPropsParam<HomeStateProps, {}, CombinedState> = (state: CombinedState) => {

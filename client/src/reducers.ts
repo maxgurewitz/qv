@@ -4,6 +4,8 @@ import { connectRouter } from 'connected-react-router'
 import { History } from 'history';
 import produce from 'immer';
 import { State, Action } from './types';
+import { AxiosError } from 'axios';
+import { object } from 'prop-types';
 
 const initialState: State = {
   accessToken: window.localStorage.getItem("token") || null,
@@ -18,6 +20,10 @@ const initialState: State = {
     type: 'NotStartedRequestStatus'
   }
 };
+
+function isAxiosError(val: any): val is AxiosError<any> {
+  return !!val.isAxiosError;
+}
 
 function primaryReducer(state = initialState, action: Action): State {
   if (action.source !== 'internal') {
@@ -36,9 +42,6 @@ function primaryReducer(state = initialState, action: Action): State {
         draft.userInfo = null;
         return draft;
 
-      case "NoOpResponse":
-        return draft;
-
       case "HomeResourceResponse":
         const inviteIds = _.mergeWith(draft.invitePollIds, action.invitePollIds, (draftIds: number[], actionIds: number[]) => _.uniq((draftIds || []).concat(actionIds)));
 
@@ -46,19 +49,23 @@ function primaryReducer(state = initialState, action: Action): State {
           polls: _.assign(draft.polls, action.polls),
           inviteIds
         });
-      case "Initialize":
+      case "CreatePollResponse":
+        if (isAxiosError(action.response)) {
+          draft.createPollRequest = {
+            type: 'FailedRequestStatus',
+            error: action.response
+          };
+        } else {
+          draft.createPollRequest = {
+            type: 'SuccessfulRequestStatus',
+            response: action.response
+          };
+
+          draft.polls[action.response.id] = action.response;
+        }
         return draft;
 
-      case "Login":
-        return draft;
-
-      case "AuthCallback":
-        return draft;
-
-      case "RequestHomeResource":
-        return draft;
-
-      case "NoOp":
+      default:
         return draft;
     }
   });

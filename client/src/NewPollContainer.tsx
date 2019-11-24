@@ -12,7 +12,7 @@ interface PollForm {
 }
 
 interface NewPollFormApplicationState {
-  createPollRequest: RequestStatus<AxiosError, Poll>,
+  createPollRequest: RequestStatus<Poll, AxiosError>,
 }
 
 function initializePollForm(): PollForm {

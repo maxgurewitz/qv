@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { take, put, takeLeading, takeEvery, all, call } from 'redux-saga/effects'
 import { login, logOut } from './auth';
 import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction, CombinedState } from './types';
+// TODO centralize error handling
 import { getUserInfo, getHomeResource } from './api';
 import { AxiosError } from 'axios';
 

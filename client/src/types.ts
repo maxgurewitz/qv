@@ -79,8 +79,9 @@ export interface State {
   polls: Polls,
   proposals: Proposals,
   invitePollIds: InvitePollIds,
-  createPollRequest: RequestStatus<AxiosError, Poll>,
-  initializeRequest: RequestStatus<AxiosError, void>,
+  createPollRequest: RequestStatus<Poll, AxiosError>,
+  // FIXME add value to response
+  initializeRequest: RequestStatus<void, AxiosError>,
 }
 
 interface BaseAction {
@@ -101,11 +102,6 @@ export interface HomeResourceResponseAction extends BaseAction {
   type: "HomeResourceResponse",
   polls: Polls,
   invitePollIds: InvitePollIds
-}
-
-export interface NoOpResponseAction extends BaseAction {
-  type: "NoOpResponse",
-  uuid: string,
 }
 
 export interface LoginAction extends BaseAction {
@@ -154,7 +150,6 @@ export type Action =
   RequestHomeResourceAction |
   HomeResourceResponseAction |
   LogOutAction |
-  NoOpResponseAction |
   AuthCallbackAction |
   CreatePollAction |
   CreatePollResponseAction |
