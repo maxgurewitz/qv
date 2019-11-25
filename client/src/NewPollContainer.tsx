@@ -2,8 +2,9 @@ import React, { useCallback, useState, SetStateAction } from 'react';
 import _ from 'lodash';
 import { useSelector, useDispatch, connect, MapStateToPropsParam } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
-import { CombinedState, Poll, RequestStatus } from './types';
+import { CombinedState, Poll, RequestStatus, CreatePollAction } from './types';
 import { AxiosError } from 'axios';
+import { Button } from '@material-ui/core';
 
 interface PollForm {
   fullDescriptionLink: string | null,
@@ -33,11 +34,26 @@ const NewPoll2: React.FC = () => {
     }));
 
   const createPoll = useCallback(
-    () => dispatch({ type: 'create-poll' }),
-    [dispatch]
+    () => {
+      if (form.title !== null && form.summary !== null) {
+        const createPollAction: CreatePollAction = {
+          type: 'CreatePoll',
+          source: 'internal',
+          summary: form.summary,
+          title: form.title,
+          fullDescriptionLink: form.fullDescriptionLink
+        };
+
+        dispatch(createPollAction);
+      }
+    },
+    [dispatch, ..._.values(form)]
   );
 
-  const isPollValid = !_.isEmpty(form.title) && !_.isEmpty(form.summary);
+  const canSubmitPoll =
+    newPollFormApplicationState.createPollRequest.type === 'NotStartedRequestStatus' &&
+    form.title !== null && !!form.title.length &&
+    form.summary !== null && !!form.summary.length;
 
   return (
     <div>
@@ -76,7 +92,10 @@ const NewPoll2: React.FC = () => {
           margin='normal'
         />
       </form>
-      {/* FIXME submit button should create poll then re-direct to update poll */}
+
+      <Button color={canSubmitPoll ? 'primary' : 'secondary'} disabled={!canSubmitPoll} variant='contained' onClick={createPoll}>
+        Submit
+      </Button>
     </div>
   );
 };

@@ -41,7 +41,6 @@ export interface UserInfo {
 export enum PollProgressEnum { NotStarted, InProgress, Finished }
 
 export interface CreatePollPayload {
-  email: string,
   title: string,
   pollType: string,
   summary: string,
@@ -135,6 +134,7 @@ export interface CreatePollResponseAction extends BaseAction {
 export interface CreatePollAction extends BaseAction {
   type: "CreatePoll",
   summary: string,
+  title: string,
   fullDescriptionLink: string | null
 }
 

@@ -44,7 +44,6 @@ export async function getHomeResource(token: string): Promise<HomeResource> {
 
 export async function createPoll(token: string, payload: CreatePollPayload): Promise<Poll> {
   const body = {
-    email: payload.email,
     title: payload.title,
     poll_type: payload.pollType,
     summary: payload.summary,
