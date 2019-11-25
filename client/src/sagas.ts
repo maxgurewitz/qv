@@ -12,6 +12,7 @@ function* watchLogin() {
   yield takeEvery('Login', login)
 }
 
+// FIXME may be able to remove
 function* waitForUserInfoPresent() {
   let maybeUserInfo: UserInfo | null = yield select(state => state.primary.userInfo);
 
@@ -95,8 +96,6 @@ function* handleApiError(e: AxiosError) {
 }
 
 function* requestHomeResource(action: RequestHomeResourceAction) {
-  yield waitForUserInfoPresent();
-
   let homeResource: HomeResource | null = null;
   let state: State = yield select(state => state.primary);
 

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { UserInfo, HomeResource, Poll, PollProgressEnum } from './types';
+import { UserInfo, HomeResource, Poll, PollProgressEnum, CreatePollAction, CreatePollPayload } from './types';
 
 // TODO replace as part of build
 const BASE_URL = 'http://localhost:8000/api';
@@ -39,6 +39,39 @@ export async function getHomeResource(token: string): Promise<HomeResource> {
   return {
     polls,
     invitePollIds: invite_poll_ids
+  };
+}
+
+export async function createPoll(token: string, payload: CreatePollPayload): Promise<Poll> {
+  const body = {
+    email: payload.email,
+    title: payload.title,
+    poll_type: payload.pollType,
+    summary: payload.summary,
+    full_description_link: payload.fullDescriptionLink,
+  };
+
+  const response = await axios({
+    method: 'post',
+    data: body,
+    url: `${BASE_URL}/private/polls`,
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  const { id, email, title, poll_type, summary, full_description_link, current_progress, created_at, updated_at } = response.data.poll;
+
+  return {
+    id,
+    email,
+    title,
+    pollType: poll_type,
+    summary,
+    fullDescriptionLink: full_description_link,
+    currentProgress: current_progress,
+    createdAt: created_at,
+    updatedAt: updated_at
   };
 }
 

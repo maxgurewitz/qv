@@ -40,6 +40,14 @@ export interface UserInfo {
 
 export enum PollProgressEnum { NotStarted, InProgress, Finished }
 
+export interface CreatePollPayload {
+  email: string,
+  title: string,
+  pollType: string,
+  summary: string,
+  fullDescriptionLink: string | null,
+}
+
 export interface Poll {
   id: number,
   email: string,
@@ -80,7 +88,7 @@ export interface State {
   proposals: Proposals,
   invitePollIds: InvitePollIds,
   createPollRequest: RequestStatus<Poll, AxiosError>,
-  // FIXME add value to response
+  // TODO add value to response
   initializeRequest: RequestStatus<void, AxiosError>,
 }
 
