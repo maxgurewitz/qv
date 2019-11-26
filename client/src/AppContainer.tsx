@@ -19,7 +19,7 @@ interface InitializedProps {
 const Initialized: React.FC<InitializedProps> = ({ loggedIn }) => {
   return (
     <Switch>
-      <Route path="/:path(app|new-poll)" render={() => (
+      <Route path="/:path(app|new-poll|update-poll)" render={() => (
         loggedIn ?
           <LoggedIn /> :
           <Redirect to="/" />
@@ -52,7 +52,7 @@ const App: React.FC<AppProps> = ({ loggedIn, initializing }) => {
         <Switch>
           <Route render={() => (
             initializing ?
-              <Initializing/> :
+              <Initializing /> :
               <Initialized loggedIn={loggedIn} />
           )} />
         </Switch>

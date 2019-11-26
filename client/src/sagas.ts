@@ -4,28 +4,11 @@ import _ from 'lodash';
 import { race, delay, take, put, takeLeading, takeEvery, all, call } from 'redux-saga/effects'
 import { login, logOut } from './auth';
 import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction, CombinedState, CreatePollAction, Poll, CreatePollResponseAction } from './types';
-// TODO centralize error handling
 import { getUserInfo, getHomeResource, createPoll } from './api';
 import { AxiosError } from 'axios';
 
 function* watchLogin() {
   yield takeEvery('Login', login)
-}
-
-// FIXME may be able to remove
-function* waitForUserInfoPresent() {
-  let maybeUserInfo: UserInfo | null = yield select(state => state.primary.userInfo);
-
-  if (!maybeUserInfo) {
-    const { userInfoAction } = yield race({
-      userInfoAction: take('UserInfo'),
-      delay: delay(5000)
-    });
-
-    if (!userInfoAction) {
-      yield put({ source: 'internal', type: 'LogOut' });
-    }
-  }
 }
 
 function* onAuthCallback(action: AuthCallbackAction) {
@@ -91,8 +74,6 @@ function* handleApiError(e: AxiosError) {
   if (e.code === '401' || e.code === '403') {
     yield put({ type: 'LogOut' });
   }
-
-  throw e;
 }
 
 function* requestHomeResource(action: RequestHomeResourceAction) {
@@ -101,9 +82,10 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
   if (state.accessToken != null && state.userInfo != null) {
     let homeResource: HomeResource | null = null;
     try {
-      // FIXME don't think the catch is right
-      homeResource = yield (getHomeResource(state.accessToken).catch(handleApiError));
-    } catch (e) { }
+      homeResource = yield getHomeResource(state.accessToken);
+    } catch (e) {
+      yield handleApiError(e);
+    }
 
     if (homeResource != null) {
       const invitePollIds = {
@@ -138,10 +120,10 @@ function* onCreatePollCallback(action: CreatePollAction) {
     };
 
     try {
-      // FIXME don't think the catch is right;
-      poll = yield (createPoll(state.accessToken, pollPayload).catch(handleApiError));
+      poll = yield createPoll(state.accessToken, pollPayload);
       response = poll as Poll;
     } catch (e) {
+      yield handleApiError(e);
       response = e;
     }
 
@@ -152,6 +134,10 @@ function* onCreatePollCallback(action: CreatePollAction) {
     };
 
     yield put(createPollResponse);
+
+    if (poll !== null) {
+      yield put(push(`/update-poll/${poll.id}`));
+    }
   }
 }
 

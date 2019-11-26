@@ -10,7 +10,7 @@ import { Route, Switch } from 'react-router';
 import { Action, CombinedState } from './types';
 import styles from './LoggedIn.module.css';
 import Home from './HomeContainer';
-import NewPoll from './NewPollContainer';
+import NewPoll from './NewPoll';
 
 const LoggedIn: React.FC<LoggedInProps> = ({ logOut }) => {
   return (
@@ -31,6 +31,8 @@ const LoggedIn: React.FC<LoggedInProps> = ({ logOut }) => {
       <Switch>
         <Route path="/app" component={Home} />
         <Route path="/new-poll" component={NewPoll} />
+        {/* FIXME path param and component*/}
+        <Route path="/update-poll" component={NewPoll} />
       </Switch>
     </div>
   );
