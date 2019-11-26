@@ -12,7 +12,7 @@ import styles from './LoggedIn.module.css';
 import Home from './HomeContainer';
 import NewPoll from './NewPollContainer';
 
-const LoggedIn: React.FC<LoggedInProps> = ({logOut}) => {
+const LoggedIn: React.FC<LoggedInProps> = ({ logOut }) => {
   return (
     <div className={styles.loggedIn}>
       <AppBar position="static">
@@ -24,13 +24,13 @@ const LoggedIn: React.FC<LoggedInProps> = ({logOut}) => {
           </Tabs>
           <div className={styles.grow} />
           <Button onClick={logOut} variant="contained" color="secondary" >
-              Log Out
+            Log Out
           </Button>
         </Toolbar>
       </AppBar>
       <Switch>
-        <Route path="/app" component={Home}/>
-        <Route path="/new-poll" component={NewPoll}/>
+        <Route path="/app" component={Home} />
+        <Route path="/new-poll" component={NewPoll} />
       </Switch>
     </div>
   );

@@ -32,24 +32,31 @@ function primaryReducer(state = initialState, action: Action): State {
 
   return produce(state, draft => {
     switch (action.type) {
-      case "UserInfo":
+      case 'UserInfo':
         draft.userInfo = action.userInfo;
         draft.accessToken = action.accessToken;
         return draft;
 
-      case "LogOut":
+      case 'LogOut':
         draft.accessToken = null;
         draft.userInfo = null;
         return draft;
 
-      case "HomeResourceResponse":
+      case 'HomeResourceResponse':
         const inviteIds = _.mergeWith(draft.invitePollIds, action.invitePollIds, (draftIds: number[], actionIds: number[]) => _.uniq((draftIds || []).concat(actionIds)));
 
         return _.assign(draft, {
           polls: _.assign(draft.polls, action.polls),
           inviteIds
         });
-      case "CreatePollResponse":
+
+      case 'CreatePoll':
+        draft.createPollRequest = {
+          type: 'InProgressRequestStatus',
+        };
+        return draft;
+
+      case 'CreatePollResponse':
         if (isAxiosError(action.response)) {
           draft.createPollRequest = {
             type: 'FailedRequestStatus',
