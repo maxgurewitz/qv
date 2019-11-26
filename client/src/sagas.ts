@@ -3,9 +3,9 @@ import { select } from 'redux-saga/effects';
 import _ from 'lodash';
 import { race, delay, take, put, takeLeading, takeEvery, all, call } from 'redux-saga/effects'
 import { login, logOut } from './auth';
-import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction, CombinedState, CreatePollAction } from './types';
+import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction, CombinedState, CreatePollAction, Poll, CreatePollResponseAction } from './types';
 // TODO centralize error handling
-import { getUserInfo, getHomeResource } from './api';
+import { getUserInfo, getHomeResource, createPoll } from './api';
 import { AxiosError } from 'axios';
 
 function* watchLogin() {
@@ -96,11 +96,12 @@ function* handleApiError(e: AxiosError) {
 }
 
 function* requestHomeResource(action: RequestHomeResourceAction) {
-  let homeResource: HomeResource | null = null;
   let state: State = yield select(state => state.primary);
 
   if (state.accessToken != null && state.userInfo != null) {
+    let homeResource: HomeResource | null = null;
     try {
+      // FIXME don't think the catch is right
       homeResource = yield (getHomeResource(state.accessToken).catch(handleApiError));
     } catch (e) { }
 
@@ -122,8 +123,36 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
   }
 }
 
-function onCreatePollCallback(action: CreatePollAction) {
+function* onCreatePollCallback(action: CreatePollAction) {
+  let state: State = yield select(state => state.primary);
+  let response: Poll | AxiosError;
 
+  if (state.accessToken != null && state.userInfo != null) {
+    let poll: Poll | null = null;
+
+    const pollPayload = {
+      title: action.title,
+      pollType: 'qv',
+      summary: action.summary,
+      fullDescriptionLink: action.fullDescriptionLink,
+    };
+
+    try {
+      // FIXME don't think the catch is right;
+      poll = yield (createPoll(state.accessToken, pollPayload).catch(handleApiError));
+      response = poll as Poll;
+    } catch (e) {
+      response = e;
+    }
+
+    const createPollResponse: CreatePollResponseAction = {
+      source: 'internal',
+      type: 'CreatePollResponse',
+      response
+    };
+
+    yield put(createPollResponse);
+  }
 }
 
 function* watchCreatePoll() {
