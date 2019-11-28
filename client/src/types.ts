@@ -60,7 +60,7 @@ export interface Poll {
 }
 
 export interface Polls {
-  [pollId: number]: Poll | null
+  [pollId: number]: Poll
 }
 
 export interface Proposal {
@@ -87,6 +87,8 @@ export interface State {
   proposals: Proposals,
   invitePollIds: InvitePollIds,
   createPollRequest: RequestStatus<Poll, AxiosError>,
+  updatePollRequest: RequestStatus<Poll, AxiosError>,
+  getPollRequest: RequestStatus<Poll, AxiosError>,
   // TODO add value to response
   initializeRequest: RequestStatus<void, AxiosError>,
 }
@@ -138,6 +140,16 @@ export interface CreatePollAction extends BaseAction {
   fullDescriptionLink: string | null
 }
 
+export interface GetPollAction extends BaseAction {
+  type: "GetPoll",
+  id: number
+}
+
+export interface GetPollResponseAction extends BaseAction {
+  type: "GetPollResponse",
+  response: AxiosError | Poll
+}
+
 export interface LogOutAction extends BaseAction {
   type: "LogOut"
 }
@@ -155,6 +167,8 @@ export type Action =
   NoOpAction |
   InitializeAction |
   LoginAction |
+  GetPollAction |
+  GetPollResponseAction |
   RequestHomeResourceAction |
   HomeResourceResponseAction |
   LogOutAction |

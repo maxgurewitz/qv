@@ -1,10 +1,10 @@
 import { push } from 'connected-react-router';
 import { select } from 'redux-saga/effects';
 import _ from 'lodash';
-import { race, delay, take, put, takeLeading, takeEvery, all, call } from 'redux-saga/effects'
+import { put, takeLeading, takeEvery, all, call } from 'redux-saga/effects'
 import { login, logOut } from './auth';
-import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction, CombinedState, CreatePollAction, Poll, CreatePollResponseAction } from './types';
-import { getUserInfo, getHomeResource, createPoll } from './api';
+import { Polls, UserInfoAction, AuthCallbackAction, InitializeAction, UserInfo, HomeResource, State, HomeResourceResponseAction, RequestHomeResourceAction, CombinedState, CreatePollAction, Poll, CreatePollResponseAction, GetPollAction, GetPollResponseAction } from './types';
+import { getUserInfo, getHomeResource, createPoll, getPoll } from './api';
 import { AxiosError } from 'axios';
 
 function* watchLogin() {
@@ -107,9 +107,9 @@ function* requestHomeResource(action: RequestHomeResourceAction) {
 
 function* onCreatePollCallback(action: CreatePollAction) {
   let state: State = yield select(state => state.primary);
-  let response: Poll | AxiosError;
 
   if (state.accessToken != null && state.userInfo != null) {
+    let response: Poll | AxiosError;
     let poll: Poll | null = null;
 
     const pollPayload = {
@@ -141,6 +141,38 @@ function* onCreatePollCallback(action: CreatePollAction) {
   }
 }
 
+function* onGetPollCallback(action: GetPollAction) {
+  let state: State = yield select(state => state.primary);
+
+  if (state.accessToken != null && state.userInfo != null) {
+    const poll = state.polls[action.id];
+    let response: Poll | AxiosError;
+
+    if (poll) {
+      response = poll;
+    } else {
+      try {
+        response = yield getPoll(state.accessToken, action.id);
+      } catch (e) {
+        yield handleApiError(e);
+        response = e;
+      }
+    }
+
+    const getPollResponse: GetPollResponseAction = {
+      source: 'internal',
+      type: 'GetPollResponse',
+      response
+    };
+
+    yield put(getPollResponse);
+  }
+}
+
+function* watchGetPoll() {
+  yield takeLeading('GetPoll', onGetPollCallback);
+}
+
 function* watchCreatePoll() {
   yield takeLeading('CreatePoll', onCreatePollCallback);
 }
@@ -164,6 +196,7 @@ function* watchRequestHomeResource() {
 export default function* rootSaga(): IterableIterator<any> {
   yield all([
     call(watchCreatePoll),
+    call(watchGetPoll),
     call(watchLogin),
     call(watchLogOut),
     call(watchAuthCallback),

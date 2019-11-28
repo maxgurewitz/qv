@@ -5,7 +5,6 @@ import { History } from 'history';
 import produce from 'immer';
 import { State, Action } from './types';
 import { AxiosError } from 'axios';
-import { object } from 'prop-types';
 
 const initialState: State = {
   accessToken: window.localStorage.getItem("token") || null,
@@ -18,7 +17,13 @@ const initialState: State = {
   },
   createPollRequest: {
     type: 'NotStartedRequestStatus'
-  }
+  },
+  updatePollRequest: {
+    type: 'NotStartedRequestStatus'
+  },
+  getPollRequest: {
+    type: 'NotStartedRequestStatus'
+  },
 };
 
 function isAxiosError(val: any): val is AxiosError<any> {
@@ -54,6 +59,21 @@ function primaryReducer(state = initialState, action: Action): State {
         draft.createPollRequest = {
           type: 'InProgressRequestStatus',
         };
+        return draft;
+
+      case 'GetPollResponse':
+        if (isAxiosError(action.response)) {
+          draft.getPollRequest = {
+            type: 'FailedRequestStatus',
+            error: action.response
+          }
+        } else {
+          draft.polls[action.response.id] = action.response;
+          draft.getPollRequest = {
+            type: 'SuccessfulRequestStatus',
+            response: action.response
+          }
+        }
         return draft;
 
       case 'CreatePollResponse':

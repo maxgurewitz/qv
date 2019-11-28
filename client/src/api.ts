@@ -42,6 +42,30 @@ export async function getHomeResource(token: string): Promise<HomeResource> {
   };
 }
 
+export async function getPoll(token: string, requestedId: number): Promise<Poll> {
+  const response = await axios({
+    method: 'get',
+    url: `${BASE_URL}/private/polls/${requestedId}`,
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  const { id, email, title, poll_type, summary, full_description_link, current_progress, created_at, updated_at } = response.data.poll;
+
+  return {
+    id,
+    email,
+    title,
+    pollType: poll_type,
+    summary,
+    fullDescriptionLink: full_description_link,
+    currentProgress: current_progress,
+    createdAt: created_at,
+    updatedAt: updated_at
+  };
+}
+
 export async function createPoll(token: string, payload: CreatePollPayload): Promise<Poll> {
   const body = {
     title: payload.title,

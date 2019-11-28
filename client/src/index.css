@@ -19,3 +19,10 @@ code {
 .centered-grid {
     height: 100%;
 }
+
+.loading {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

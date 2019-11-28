@@ -32,7 +32,7 @@ class Home extends React.Component<HomeProps, HomeState> {
 
     if (isLoading) {
       return (
-        <div className={styles.loading}>
+        <div className="loading">
           <CircularProgress />
         </div>
       );
