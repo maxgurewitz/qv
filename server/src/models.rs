@@ -1,8 +1,8 @@
 use super::schema::*;
-use chrono::prelude::*;
-use std::sync::Arc;
 use super::sql_enum_types::*;
+use chrono::prelude::*;
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Auth0Profile {
@@ -13,7 +13,9 @@ pub struct Auth0Profile {
   pub picture: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Queryable, Identifiable, AsChangeset, Eq, PartialEq, Hash, Clone)]
+#[derive(
+  Debug, Serialize, Deserialize, Queryable, Identifiable, AsChangeset, Eq, PartialEq, Hash, Clone,
+)]
 pub struct Poll {
   pub id: i32,
   pub email: String,
@@ -62,8 +64,16 @@ pub struct CreatePollPayload {
   pub full_description_link: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize, AsChangeset)]
+#[table_name = "polls"]
+pub struct PatchPollPayload {
+  pub title: Option<String>,
+  pub summary: Option<String>,
+  pub full_description_link: Option<String>,
+}
+
 #[derive(Insertable)]
-#[table_name="polls"]
+#[table_name = "polls"]
 pub struct NewPoll<'a> {
   pub email: &'a str,
   pub title: &'a str,
@@ -73,7 +83,7 @@ pub struct NewPoll<'a> {
 }
 
 #[derive(Insertable)]
-#[table_name="proposals"]
+#[table_name = "proposals"]
 pub struct NewProposal<'a> {
   // TODO add title
   pub summary: &'a str,
@@ -82,20 +92,20 @@ pub struct NewProposal<'a> {
 }
 
 #[derive(Insertable)]
-#[table_name="user_invites"]
+#[table_name = "user_invites"]
 pub struct NewUserInvite<'a> {
   pub email: &'a str,
   pub poll_id: &'a i32,
 }
 
 #[derive(Insertable)]
-#[table_name="user_invite_locks"]
+#[table_name = "user_invite_locks"]
 pub struct NewUserInviteLock<'a> {
   pub user_invite_id: &'a i32,
 }
 
 #[derive(Insertable)]
-#[table_name="votes"]
+#[table_name = "votes"]
 pub struct NewVote<'a> {
   pub proposal_id: &'a i32,
   pub user_invite_id: &'a i32,
@@ -104,8 +114,8 @@ pub struct NewVote<'a> {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InviteUserPayload {
-  pub email: String
-} 
+  pub email: String,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserInfoResource {
@@ -113,7 +123,7 @@ pub struct UserInfoResource {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct CreatePollResource {
+pub struct PollResource {
   pub poll: Poll,
 }
 
@@ -142,11 +152,11 @@ pub struct CreateProposalResource {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GenericJsonResponse {
-  pub message: String
+  pub message: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HomeResource {
   pub polls: HashSet<Poll>,
-  pub invite_poll_ids: Vec<i32>
+  pub invite_poll_ids: Vec<i32>,
 }
